@@ -15,8 +15,9 @@ class DataPoint():
                  label,
                  in_memory,
                  memory_loc=None,
-                 slc=None
-                 compress=False):
+                 slc=None,
+                 compress=False
+                 ):
         
         self.name = name
         self.label = label
