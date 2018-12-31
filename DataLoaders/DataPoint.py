@@ -104,7 +104,11 @@ class DataPoint():
     def get_slc(self):
         return self.slc
     
-    def get_affine(self):
+    def get_affine(self, copy):
+        
+        if copy:
+            return np.copy(self.affine)
+        
         return self.affine
         
     def clear_data(self):

@@ -21,7 +21,9 @@ gen = Seg_Generator(data_points = train,
                  batch_size = 1,
                  n_classes = 1,
                  shuffle = True,
-                 augment = False)
+                 augment = True,
+                 distort = True,
+                 )
 
 test_gen = Seg_Generator(data_points = test,
                  dim=(1, 128, 128, 128),
