@@ -12,15 +12,15 @@ import numpy as np
 
 data_loader = RN_DataLoader(
         init_location = '/media/sage/data/nifti_endoleak/',
-        #label_location = '/home/sage/GenDiagFramework/labels/annotations.csv')
-        label_location = '/home/sage/small.csv')
+        label_location = '/home/sage/GenDiagFramework/labels/annotations.csv')
+        #label_location = '/home/sage/small.csv')
 
 train, test = data_loader.get_train_test_split(.2, 43)
 np.warnings.filterwarnings('ignore')
 
 print(len(train), len(test))
 
-train_gen = RN_Generator(data_points = test,
+train_gen = RN_Generator(data_points = train,
                              dim=(512, 512, 1),
                              batch_size = 1,
                              n_classes = 1,

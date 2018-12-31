@@ -12,12 +12,13 @@ config = {}
 
 
 #Could also hypothetically only load some data into memory, some load~
-config['in_memory'] = True
+config['in_memory'] = False
 config['memory_loc'] = '/media/sage/temp/'
+config['compress'] = True
 
 
 #Where to save models
-config['model_loc'] = '/home/sage/GenDiagFramework/models/'
+config['model_loc'] = '/home/sage/GenDiagFramework/saved_models/'
 
 
 # Retina Net (RN) Config Information #

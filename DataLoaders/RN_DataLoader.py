@@ -53,7 +53,7 @@ class RN_DataLoader(TwoD_DataLoader):
                                                   label=label,
                                                   in_memory=config['in_memory'],
                                                   memory_loc=config['memory_loc'],
-                                                  slc=slc, compress=True))
+                                                  slc=slc, compress=config['compress']))
                 
                 
 def load_annotations(annotations_loc):
