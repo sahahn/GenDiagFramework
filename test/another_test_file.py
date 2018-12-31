@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from DataLoaders.RN_DataLoader import RN_DataLoader
-from Generators.Generators import RN_Generator
+from Generators.RN_Generator import RN_Generator
 
 import RetinaNet.backbone, RetinaNet.losses, keras
 from RetinaNet.retinanet import get_predictions
