@@ -29,12 +29,7 @@ class DataPoint():
         self.data = None
         self.affine = None
         self.pixdims = None
-        
-    def get_ref(self):
-        return self.name + str(self.slc)
-    
-    def get_patient(self):
-        return self.name.split('_')[0][:-1]
+        self.pred_label = None
         
     def set_data(self, data):
         
@@ -50,6 +45,33 @@ class DataPoint():
             np.save(f, data)
             f.close()
             
+    def set_affine(self, affine):
+        self.affine = affine
+        
+    def set_pixdims(self, pixdims):
+        self.pixdims = pixdims
+        
+    def set_pred_label(self, pred_label):
+        self.pred_label = pred_label
+        
+        
+    def get_ref(self):
+        return self.name + str(self.slc)
+    
+    def get_patient(self):
+        return self.name.split('_')[0][:-1]
+    
+    
+    def get_label(self, copy=False):
+        
+        if copy:
+            return np.copy(self.label)
+        
+        return self.label
+    
+    def get_thickness(self):
+        return self.pixdims[3]
+    
     def get_data(self, copy=False):
             
         if self.in_memory and not copy:
@@ -69,25 +91,27 @@ class DataPoint():
             
             return data
         
+    def get_pred_label(self, copy):
+        
+        if copy:
+            return np.copy(self.pred_label)
+        
+        return self.pred_label
+    
+    def get_name(self):
+        return self.name
+    
+    def get_slc(self):
+        return self.slc
+    
+    def get_affine(self):
+        return self.affine
+        
     def clear_data(self):
         
         del self.data
         
-    def get_label(self, copy=False):
-        
-        if copy:
-            return np.copy(self.label)
-        
-        return self.label
-    
-    def set_affine(self, affine):
-        self.affine = affine
-        
-    def set_pixdims(self, pixdims):
-        self.pixdims = pixdims
-        
-    def get_thickness(self):
-        return self.pixdims[3]
+
         
         
         

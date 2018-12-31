@@ -62,4 +62,4 @@ model.fit_generator(generator=train_gen,
 boxes, scores = get_predictions(model, test_gen, .1)
 
 for i in range(len(boxes)):
-    print(test_gen.data_points[i].get_ref(), boxes[i], scores[i])
+    test[i].set_pred_label(boxes[i])

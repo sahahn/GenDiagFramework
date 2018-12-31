@@ -91,31 +91,32 @@ class Seg_DataLoader(DataLoader):
                 raw_file = nib.load(raw_file_path + '.gz')
             
             self.data_points[i].set_pixdims(raw_file.header['pixdim'])
-            self.data_points[i].set_affine(raw_file.affine)
             
             thickness = self.data_points[i].get_thickness()
             new_shape = config['Seg_input_size'][1:]  #Channels first
             
             data = raw_file.get_data()
             ranges = self.range_dict[name]
+            affine = raw_file.affine
             
-            
-            data = determine_crop_3d(data, ranges, thickness,
-                       new_shape, self.pad_info[0], self.pad_info[1])
-            
-            
+            data, new_affine = determine_crop_3d(data, ranges, thickness,
+                       new_shape, self.pad_info[0], self.pad_info[1], affine)
+
             data = np.clip(data, *config['clip_range'])
             data = normalize_data(data)
             data = np.expand_dims(data, axis=0) #Channels first by default 
             
             self.data_points[i].set_data(data)
+            self.data_points[i].set_affine(new_affine)
             
             if self.label_type == 'full':
-                    self.data_points[i].label = determine_crop_3d( 
-                            self.data_points[i].label, ranges, thickness,
-                            new_shape, self.pad_info[0], self.pad_info[1])
+                new_label, new_affine = determine_crop_3d( 
+                    self.data_points[i].label, ranges, thickness,
+                    new_shape, self.pad_info[0], self.pad_info[1], affine)
+                
+                self.data_points[i].label = new_label
             
-            #Channels first by default
+            #Channels first by default (regardless of if new label, set here)
             self.data_points[i].label = np.expand_dims(self.data_points[i].label, axis=0)
 
 

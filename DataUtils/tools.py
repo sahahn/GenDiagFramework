@@ -29,6 +29,17 @@ def resample(image, new_shape):
     return image
 
 
+def resample_3d(image, affine, new_shape):
+    
+    scale_factor = np.array(new_shape) / image.shape
+    image = scipy.ndimage.interpolation.zoom(image, scale_factor)
+    
+    new_affine = np.copy(affine)
+    new_affine[:3, :3] = affine[:3, :3] * scale_factor
+    new_affine[:, 3][:3] = affine[:, 3][:3] + (image.shape * np.diag(affine)[:3] * (1 - scale_factor)) / 2
+    
+    return image, new_affine
+
 def determine_crop(label, image, new_shape, pad_limit):
     ''' Returns a mix of crop/resized version of an image
     
@@ -112,14 +123,15 @@ def calculate_ranges(data_points):
             
     return range_dict
 
-def determine_crop_3d(scan, ranges, thickness, new_shape, base_pad, axial_pad):
+def determine_crop_3d(scan, ranges, thickness, new_shape, base_pad, axial_pad, affine):
     ''' 
     scan - the scan (3d matrix) to crop/reshape
     ranges - in terms of axial [bot, top, x0, y0, x1, y1]
     thickness - the slice thickness of the scan
     new_shape - the desired new shape (In format (Sag, Cor. Axial))
     base_pad - num to pad in sag. + cor. dimension
-    axial_pad - num to pad in axial dimension (pre divided by thickness)
+    axial_pad - num to pad in axial dimension (pre divided by thickness
+    affine - the affine of the scan)
     '''
     
     a_p = int(axial_pad / thickness)
@@ -164,9 +176,9 @@ def determine_crop_3d(scan, ranges, thickness, new_shape, base_pad, axial_pad):
     shp = np.shape(scan)
 
     if shp != new_shape:
-        scan = resample(scan, new_shape)
+        scan, affine = resample_3d(scan, affine, new_shape)
 
-    return scan
+    return scan, affine
     
     
     
