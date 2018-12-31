@@ -3,6 +3,7 @@
 from DataLoaders.DataLoader import DataLoader
 from DataLoaders.RN_DataLoader import load_annotations
 from DataUtils.tools import determine_crop_3d, calculate_ranges, normalize_data
+from DataUtils.Seg_tools import get_seen
 
 from DataLoaders.DataPoint import DataPoint
 from config import config
@@ -22,6 +23,7 @@ class Seg_DataLoader(DataLoader):
                  annotations,
                  label_type='full',
                  seg_key='endo',
+                 n_classes=1,
                  pad_info=(0,7)
                  ):
         ''' 
@@ -31,7 +33,13 @@ class Seg_DataLoader(DataLoader):
                      on the full scan size, or if label_type = 'crop'
                      then segmentations are saved with specific crop details
         seg_key - e.g. 'filename_endo', 'filename_seg', 'filename_full',
-                  so the filename followed by_ and the seg_key
+                  so the filename followed by_ and the seg_key. If label_type
+                  is set to 'partial', then seg_key can refer to a list of keys,
+                  where by defaults the first refers to the partial key, and the
+                  second to any full segmentations.
+        n_classes - If label_type is partial, then the number of different classes
+                  must be provided (where it is assumed class 1 has label 1, class
+                  2 label 2, ect... in calculating partial segs)
         pad_info - (base_pad, axial_pad), if label_type = 'crop', then
                      ensure that the pad_info matches the saved format,
                      **important**
@@ -45,9 +53,13 @@ class Seg_DataLoader(DataLoader):
         self.label_type = label_type
         self.pad_info = pad_info
         self.seg_key = seg_key
+        self.n_classes = n_classes
         
-        #If a loaction, load annotations from location, otherwise
-        #assume annotations is a list of datapoint and load ranges.
+        if type(seg_key) != list and self.label_type == 'partial':
+            print('Must provide a list of seg keys when loading partials')
+        
+        #If a location, load annotations from location, otherwise
+        #assume annotations are a list of datapoint and load ranges.
         if type(annotations) == str:
             anns = load_annotations(annotations)
         else:
@@ -77,6 +89,28 @@ class Seg_DataLoader(DataLoader):
             self.data_points.append(DataPoint(name=name, label=label,
                                               in_memory=config['in_memory'],
                                               memory_loc=config['memory_loc']))
+            
+        ### IF PARTIAL SEG! ###
+        '''
+        raw_label = some_load_seg_function
+       
+        #Where it is assumed the start/axial partial seen flag is n_classes+1
+        seen = get_seen(raw_label, self.n_classes+1)
+        seen = seen.astype('float')
+        
+        label = []
+        
+        for i in range(1, self.n_classes+1):
+            seg = np.copy(raw_label)
+            
+            seg[seg!=i] = 0
+            seg[seg==i] = 1
+            
+            label.append(seg)
+            
+        label.append(seen)
+        label = np.array(label)'''
+            
         
     def load_data(self):
         
@@ -114,10 +148,15 @@ class Seg_DataLoader(DataLoader):
                     self.data_points[i].label, ranges, thickness,
                     new_shape, self.pad_info[0], self.pad_info[1], affine)
                 
-                self.data_points[i].label = new_label
+                #Channels first by default - only need to do this for full labels
+                self.data_points[i].label = np.expand_dims(new_label, axis=0)
             
-            #Channels first by default (regardless of if new label, set here)
-            self.data_points[i].label = np.expand_dims(self.data_points[i].label, axis=0)
+            
+            
+    
+        
+    
+            
 
 
 

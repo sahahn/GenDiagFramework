@@ -8,15 +8,10 @@ Code from https://github.com/ellisdg/3DUnetCNN
 import numpy as np
 from keras import backend as K
 from keras.engine import Input, Model
-from keras.layers import Conv3D, MaxPooling3D, UpSampling3D, Activation, BatchNormalization, PReLU, Deconvolution3D 
+from keras.layers import Conv3D, MaxPooling3D, UpSampling3D, Activation, BatchNormalization, Deconvolution3D 
 from functools import partial
-from unet3d.metrics import dice_coefficient_loss, get_label_dice_coefficient_function, dice_coefficient
-from keras.layers import LeakyReLU, Add, SpatialDropout3D, MaxPooling1D
-
-try:
-    from keras.engine import merge
-except ImportError:
-    from keras.layers.merge import concatenate
+from keras.layers import LeakyReLU, Add, SpatialDropout3D
+from keras.layers.merge import concatenate
     
 K.set_image_data_format("channels_first")
 

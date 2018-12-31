@@ -32,5 +32,8 @@ def weighted_dice_coefficient_loss(y_true, y_pred):
 
 
 
-dice_coef = dice_coefficient
-dice_coef_loss = dice_coefficient_loss
+def par_weighted_dice_coefficient(y_true, y_pred, axis=(-3, -2, -1), smooth=0.00001):
+    
+     K.mean((2. * (K.sum(y_true[:, :-1] * y_pred, axis=axis) + smooth/2)) /
+     (K.sum(y_true[:, :-1], axis=axis) + K.sum(K.expand_dims(y_true[:, -1],
+     axis=1) * y_pred, axis=axis) + smooth))
