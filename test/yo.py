@@ -39,5 +39,5 @@ callbacks =  [keras.callbacks.ModelCheckpoint(config['model_loc'] + '/model-{epo
 model.fit_generator(generator=gen, validation_data=test_gen,
                             use_multiprocessing=True,
                             workers=8,
-                            epochs=35, 
+                            epochs=1, 
                             callbacks=callbacks)
