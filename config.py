@@ -13,7 +13,7 @@ config = {}
 
 #Could also hypothetically only load some data into memory, some load~
 config['in_memory'] = False
-config['memory_loc'] = '/media/sage/temp/'
+config['memory_loc'] = '/mnt/sda5/temp/'
 config['compress'] = True
 
 
