@@ -6,6 +6,7 @@ Created on Thu Dec 13 11:09:31 2018
 @author: sage
 """
 import numpy as np
+import gzip
 
 class DataPoint():
     
@@ -14,13 +15,15 @@ class DataPoint():
                  label,
                  in_memory,
                  memory_loc=None,
-                 slc=None):
+                 slc=None
+                 compress=False):
         
         self.name = name
         self.label = label
         self.in_memory = in_memory
         self.memory_loc = memory_loc
         self.slc = slc
+        self.compress = compress
         
         self.data = None
         self.affine = None
@@ -37,8 +40,14 @@ class DataPoint():
         if self.in_memory:
             self.data = data
             
-        else:
+        elif not self.compress:
             np.save(self.memory_loc + self.get_ref(), data)
+            
+        else:
+            
+            f = gzip.GzipFile(self.memory_loc + self.get_ref() + '.npy.gz', 'w')
+            np.save(f, data)
+            f.close()
             
     def get_data(self, copy=False):
             
@@ -48,9 +57,16 @@ class DataPoint():
         elif self.in_memory and copy:
             return np.copy(self.data)
             
-        else:
+        elif not self.compress:
             return np.load(self.memory_loc + self.get_ref() + '.npy')
-        
+
+        else:
+            
+            f = gzip.GzipFile(self.memory_loc + self.get_ref() + '.npy.gz', 'r')
+            data = np.load(f)
+            f.close()
+            
+            return data
         
     def clear_data(self):
         
