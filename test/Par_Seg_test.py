@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from DataLoaders.Seg_DataLoader import Par_Seg_DataLoader
+from DataLoaders.Par_Seg_DataLoader import Par_Seg_DataLoader
 from Generators.Seg_Generator import Seg_Generator
 
 from Models.UNet3D import UNet3D_Extra
