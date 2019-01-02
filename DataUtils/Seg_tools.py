@@ -71,6 +71,8 @@ def get_seen(seg, start_flag):
             if flag in seg[l]:
                 seen[l] = 1
     
+    seg = seg.transpose(1,0,2)
     seen = seen.transpose(1,0,2)
+    
     
     return seen
