@@ -25,8 +25,8 @@ gen = Seg_Generator(data_points = train,
                  batch_size = 1,
                  n_classes = 3,
                  shuffle = True,
-                 augment = True,
-                 distort = True,
+                 augment = False,
+                 distort = False,
                  )
 
 test_gen = Seg_Generator(data_points = test,
@@ -41,7 +41,7 @@ loss_func = par_weighted_dice_coefficient_loss
 model = UNet3D_Extra(input_shape = (1, 128, 128, 128), n_labels=2)
 model.compile(optimizer=keras.optimizers.adam(lr=.001), loss=loss_func)
 
-print(model.summary)
+model.summary()
 
 callbacks =  [keras.callbacks.ModelCheckpoint(config['model_loc'] + '/model-{epoch:02d}.h5')]
 

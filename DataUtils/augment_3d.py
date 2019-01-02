@@ -77,7 +77,7 @@ def augment_data(data, truth, affine, scale_deviation=None, flip=True):
     
     truth_data = []
     for i in range(len(truth)):
-        truth_image = get_image(truth[0], affine)
+        truth_image = get_image(truth[i], affine)
         
         truth_data.append(resample_to_img(distort_image(truth_image,
                           flip_axis=flip_axis, scale_factor=scale_factor),
