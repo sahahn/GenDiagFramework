@@ -18,7 +18,7 @@ data_loader = RN_DataLoader(
         compress = config['compress'],
         preloaded=True)
 
-train, test = data_loader.get_train_test_split(.25, 43)
+train, test = data_loader.get_train_test_split(.05, 43)
 np.warnings.filterwarnings('ignore')
 
 print(len(train), len(test))
@@ -59,3 +59,5 @@ boxes, scores = get_predictions(model, test_gen, .1)
 
 for i in range(len(boxes)):
     test[i].set_pred_label(boxes[i])
+    
+    print(test[i].pred_label)
