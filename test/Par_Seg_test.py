@@ -4,7 +4,7 @@ from DataLoaders.Par_Seg_DataLoader import Par_Seg_DataLoader
 from Generators.Seg_Generator import Seg_Generator
 
 from Models.UNet3D import UNet3D_Extra
-from Metrics.metrics import par_weighted_dice_coefficient_loss
+from Metrics.metrics import weighted_dice_coefficient_loss
 from config import config
 
 import keras
@@ -39,9 +39,10 @@ test_gen = Seg_Generator(data_points = test,
                  shuffle = False,
                  augment = False)
 
+loss_func = weighted_dice_coefficient_loss
 
 model = UNet3D_Extra(input_shape = (1, 128, 128, 128), n_labels=2)
-model.compile(optimizer=keras.optimizers.adam(lr=.001), loss=par_weighted_dice_coefficient_loss)
+model.compile(optimizer=keras.optimizers.adam(lr=.001), loss=loss_func)
 
 callbacks =  [keras.callbacks.ModelCheckpoint(config['model_loc'] + '/model-{epoch:02d}.h5')]
 
