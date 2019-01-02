@@ -35,16 +35,15 @@ class DataPoint():
         
         if self.in_memory:
             self.data = data
-            
-        elif not self.compress:
-            np.save(self.memory_loc + self.get_ref(), data)
-            
-        else:
-            
+        
+        elif self.compress:
             f = gzip.GzipFile(self.memory_loc + self.get_ref() + '.npy.gz', 'w')
             np.save(f, data)
             f.close()
-            
+        
+        else:
+            np.save(self.memory_loc + self.get_ref(), data)
+
     def set_label(self, label):
         self.label = label
             

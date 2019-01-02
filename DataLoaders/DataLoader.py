@@ -6,29 +6,58 @@ Created on Thu Dec 13 11:00:27 2018
 @author: sage
 """
 from sklearn.model_selection import train_test_split
+from DataLoaders.DataPoint import DataPoint
 
 class DataLoader():
     '''Abstract DataLoader Class'''
     
     def __init__(self,
-                 init_location,    #Location of raw nifti files
-                 label_location,   #Location of the labels file
+                 init_location,    
+                 label_location,
+                 in_memory=True,
+                 memory_loc=None,
+                 compress=False
                  ):
+        
+        ''' 
+        init_location - Location of the raw data files.
+        label_location - Location of the label file/folder.
+        in_memory - Flag to determine if the data should be loaded into memory
+                    or if it should be saved to disk.
+        memory_loc - If saved to disk, location to save to.
+        compress - Flag to determine if the data should be saved in a
+                   compressed form.
+        '''
         
         self.init_location = init_location
         if self.init_location[-1] != '/':
              self.init_location += '/'
              
         self.label_location = label_location
-        
-        #Init data points
-        self.data_points = None
+        self.in_memory = in_memory
+        self.memory_loc = memory_loc
+        self.compress = compress
+    
+        self.data_points = []
     
     def load_labels(self):
         pass
         
     def load_data(self):
         pass
+    
+    def create_data_point(self, name, label, slc=None):
+        
+        dp = DataPoint(
+                name = name,
+                label = label,
+                in_memory = self.in_memory,
+                memory_loc = self.memory_loc,
+                compress = self.compress,
+                slc = slc )
+        
+        return dp
+        
     
     def get_unique_patients(self):
         

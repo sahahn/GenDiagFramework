@@ -4,9 +4,8 @@ from DataLoaders.DataLoader import DataLoader
 from DataLoaders.RN_DataLoader import load_annotations
 from DataUtils.tools import determine_crop_3d, calculate_ranges, normalize_data
 
-from DataLoaders.DataPoint import DataPoint
-from config import config
 import os
+from config import config
 import numpy as np
 import nibabel as nib
 
@@ -21,7 +20,10 @@ class Seg_DataLoader(DataLoader):
                  label_type='full',
                  seg_key='endo',
                  n_classes=1,
-                 pad_info=(0,7)
+                 pad_info=(0,7),
+                 in_memory=True,
+                 memory_loc=None,
+                 compress=False
                  ):
         ''' 
         label_location - A folder containing the segmentations to read in.
@@ -43,7 +45,8 @@ class Seg_DataLoader(DataLoader):
                      **important**
         '''
         
-        super().__init__(init_location, label_location)
+        super().__init__(init_location, label_location, in_memory, memory_loc,
+                         compress)
         
         if self.label_location[-1] != '/':
              self.label_location += '/'
@@ -64,8 +67,6 @@ class Seg_DataLoader(DataLoader):
             
     def load_labels(self):
         
-        self.data_points = []
-        
         seg_files = [file for file in os.listdir(self.label_location) if
                      self.seg_key in file]
 
@@ -80,10 +81,8 @@ class Seg_DataLoader(DataLoader):
             
             if self.n_classes > 1:
                 label = np.array(self.load_multiclass_seg(label))
-  
-            self.data_points.append(DataPoint(name=name, label=label,
-                                              in_memory=config['in_memory'],
-                                              memory_loc=config['memory_loc']))
+                
+            self.data_points.append(self.create_data_point(name, label))
             
     def load_data(self):
         

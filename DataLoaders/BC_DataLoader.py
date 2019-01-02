@@ -11,8 +11,6 @@ Created on Thu Dec 13 11:09:31 2018
 from DataLoaders.TwoD_DataLoader import TwoD_DataLoader
 
 from DataLoaders.RN_DataLoader import load_annotations
-from DataLoaders.DataPoint import DataPoint
-
 from DataUtils.tools import determine_crop
 
 from config import config
@@ -44,6 +42,9 @@ class BC_DataLoader(TwoD_DataLoader):
                  init_location,   
                  label_location,
                  annotations,
+                 in_memory=True,
+                 memory_loc=None,
+                 compress=False
                  ):
         
         '''
@@ -55,8 +56,8 @@ class BC_DataLoader(TwoD_DataLoader):
                       or the location of a file with ^
         '''
         
-        super().__init__(init_location, label_location)
-        
+        super().__init__(init_location, label_location, in_memory, memory_loc,
+                         compress)
 
         if type(annotations) == str:
             self.annotations = load_annotations(annotations)
@@ -91,12 +92,8 @@ class BC_DataLoader(TwoD_DataLoader):
                     for interval in label_ranges:
                         if i >= interval[0] and i <= interval[1]:
                             label = 1
-                            
-                    self.data_points.append(DataPoint(name=name,
-                                            label=label,
-                                            in_memory=config['in_memory'],
-                                            memory_loc=config['memory_loc'],
-                                            slc=slc))
+                    
+                    self.data_points.append(self.create_data_point(name, label, slc=slc))
         
         
     def get_ann_from_ind(self, indx):

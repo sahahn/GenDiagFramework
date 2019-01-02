@@ -3,11 +3,9 @@
 from DataLoaders.Seg_DataLoader import Seg_DataLoader
 from DataUtils.Seg_tools import get_seen
 
-from DataLoaders.DataPoint import DataPoint
 import os
 import numpy as np
 import nibabel as nib
-from config import config
 
 class Par_Seg_DataLoader(Seg_DataLoader):
     '''Overrides Seg_DataLoader to provide support for loading partial
@@ -44,9 +42,7 @@ class Par_Seg_DataLoader(Seg_DataLoader):
             label.append(seen)
             label = np.array(label)
   
-            self.data_points.append(DataPoint(name=name, label=label,
-                                              in_memory=config['in_memory'],
-                                              memory_loc=config['memory_loc']))
+            self.data_points.append(self.create_data_point(name, label))
             
         #Because of the way load_data is setup, and the addition of the seen
         #Channel. Set n_classes+=1, s.t. expand dims won't be called, once done

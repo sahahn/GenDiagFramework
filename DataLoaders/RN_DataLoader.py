@@ -6,7 +6,6 @@ Created on Thu Dec 13 11:09:31 2018
 @author: sage
 """
 from DataLoaders.TwoD_DataLoader import TwoD_DataLoader
-from DataLoaders.DataPoint import DataPoint
 from config import config
 
 import numpy as np
@@ -49,11 +48,7 @@ class RN_DataLoader(TwoD_DataLoader):
                 if label[0] == None:
                     label = np.empty((5))
                 
-                self.data_points.append(DataPoint(name=name,
-                                                  label=label,
-                                                  in_memory=config['in_memory'],
-                                                  memory_loc=config['memory_loc'],
-                                                  slc=slc, compress=config['compress']))
+                self.data_points.append(self.create_data_point(name, label, slc=slc))
                 
                 
 def load_annotations(annotations_loc):
