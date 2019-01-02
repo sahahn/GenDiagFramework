@@ -4,7 +4,7 @@ from DataLoaders.Par_Seg_DataLoader import Par_Seg_DataLoader
 from Generators.Seg_Generator import Seg_Generator
 
 from Models.UNet3D import UNet3D_Extra
-from Metrics.metrics import weighted_dice_coefficient_loss
+from Metrics.metrics import par_weighted_dice_coefficient_loss
 from config import config
 
 import keras
@@ -16,10 +16,7 @@ dl = Par_Seg_DataLoader(
         label_type='crop',
         seg_key=['seg', 'full'],
         n_classes=2,
-        in_memory = False,
-        memory_loc = config['memory_loc'],
-        compress = False,
-        preloaded=True)
+        in_memory = True)
 
 train, test = dl.get_train_test_split(.2, 43)
 
@@ -39,10 +36,12 @@ test_gen = Seg_Generator(data_points = test,
                  shuffle = False,
                  augment = False)
 
-loss_func = weighted_dice_coefficient_loss
+loss_func = par_weighted_dice_coefficient_loss
 
 model = UNet3D_Extra(input_shape = (1, 128, 128, 128), n_labels=2)
 model.compile(optimizer=keras.optimizers.adam(lr=.001), loss=loss_func)
+
+print(model.summary)
 
 callbacks =  [keras.callbacks.ModelCheckpoint(config['model_loc'] + '/model-{epoch:02d}.h5')]
 
