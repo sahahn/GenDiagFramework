@@ -4,10 +4,15 @@ import DataLoaders.BC_DataLoader as BC_DataLoader
 import Generators.BC_Generator as BC_Generator
 from Models.Resnet50s import ResNet50
 
+from config import config
+
 
 data_loader = BC_DataLoader(
         init_location = '/media/sage/data/nifti_endoleak/',
-        label_location = '/home/sage/GenDiagFramework/labels/AAArange.csv')
+        label_location = '/home/sage/GenDiagFramework/labels/AAArange.csv',
+        in_memory = False,
+        memory_loc = config['memory_loc'],
+        compress = True)
 
 train, test = data_loader.get_train_test_split(.2, 43)
 
@@ -20,4 +25,7 @@ train_gen = BC_Generator(data_points = train,
                              shuffle = True,
                              augment = True,
                              label_size = 5)
+
+model = ResNet50()
+
 

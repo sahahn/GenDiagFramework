@@ -11,7 +11,8 @@ import keras
 dl = Seg_DataLoader(
         init_location = '/media/sage/data/nifti_endoleak/',
         label_location = '/home/sage/GenDiagFramework/labels/leak_segs/',
-        annotations = '/home/sage/GenDiagFramework/labels/annotations.csv')
+        annotations = '/home/sage/GenDiagFramework/labels/annotations.csv',
+        in_memory = True )
 
 train, test = dl.get_train_test_split(.2, 43)
 
@@ -29,7 +30,7 @@ test_gen = Seg_Generator(data_points = test,
                  dim=(1, 128, 128, 128),
                  batch_size = 1,
                  n_classes = 1,
-                 shuffle = True,
+                 shuffle = False,
                  augment = False)
 
 
