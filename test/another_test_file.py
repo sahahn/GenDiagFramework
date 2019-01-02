@@ -15,7 +15,7 @@ data_loader = RN_DataLoader(
         label_location = '/home/sage/GenDiagFramework/labels/annotations.csv')
         #label_location = '/home/sage/small.csv')
 
-train, test = data_loader.get_train_test_split(.2, 43)
+train, test = data_loader.get_train_test_split(.25, 43)
 np.warnings.filterwarnings('ignore')
 
 print(len(train), len(test))
@@ -56,7 +56,7 @@ callbacks =  [keras.callbacks.ModelCheckpoint(config['model_loc'] + '/model-{epo
 model.fit_generator(generator=train_gen,
                             use_multiprocessing=True,
                             workers=8,
-                            epochs=1,
+                            epochs=25,
                             callbacks=callbacks)
 
 boxes, scores = get_predictions(model, test_gen, .1)
