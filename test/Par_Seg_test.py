@@ -18,7 +18,8 @@ dl = Par_Seg_DataLoader(
         n_classes=2,
         in_memory = False,
         memory_loc = config['memory_loc'],
-        compress = False)
+        compress = False,
+        preloaded=True)
 
 train, test = dl.get_train_test_split(.2, 43)
 
