@@ -45,6 +45,9 @@ class DataPoint():
             np.save(f, data)
             f.close()
             
+    def set_label(self, label):
+        self.label = label
+            
     def set_affine(self, affine):
         self.affine = affine
         

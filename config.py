@@ -46,9 +46,6 @@ config['BC_pad_limit'] = 5
 config['Seg_input_size'] = (1, 128, 128, 128)
 
 
-
-
-
 #Global clip range - if none, set [-big number, big number]
 config['clip_range'] = [-100, 600]
 
