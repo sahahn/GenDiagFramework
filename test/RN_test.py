@@ -40,7 +40,7 @@ test_gen = RN_Generator(data_points = test,
                              label_size = 5)
 
 
-model = load_RN_model('home/sage/GenDiagFramework/saved_models/model-01.h5')
+model = load_RN_model('/home/sage/GenDiagFramework/saved_models/model-01.h5')
 
 '''
 model = RetinaNet_Train()
