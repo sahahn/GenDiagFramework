@@ -16,7 +16,8 @@ class DataLoader():
                  label_location,
                  in_memory=True,
                  memory_loc=None,
-                 compress=False
+                 compress=False,
+                 preloaded=False,
                  ):
         
         ''' 
@@ -27,6 +28,7 @@ class DataLoader():
         memory_loc - If saved to disk, location to save to.
         compress - Flag to determine if the data should be saved in a
                    compressed form.
+        preloaded - Flag to indicate if data has already been saved in temp mem spot
         '''
         
         self.init_location = init_location
@@ -37,6 +39,7 @@ class DataLoader():
         self.in_memory = in_memory
         self.memory_loc = memory_loc
         self.compress = compress
+        self.preloaded = preloaded
     
         self.data_points = []
     
@@ -77,7 +80,9 @@ class DataLoader():
     def load_all(self):
         
         self.load_labels()
-        self.load_data()
+        
+        if not self.preloaded:
+            self.load_data()
     
     def get_all(self):
         '''Return just one set, for just train'''

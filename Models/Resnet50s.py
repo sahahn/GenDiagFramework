@@ -167,7 +167,6 @@ def SmallerResNet50(input_tensor=None, input_shape=(64, 64, 1)):
 
     x = Flatten()(x)
     x = Dense(1, activation='sigmoid', name='classifier')(x)
-    
  
     inputs = img_input
     model = Model(inputs, x, name='resnet50')

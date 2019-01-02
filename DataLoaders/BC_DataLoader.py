@@ -44,7 +44,8 @@ class BC_DataLoader(TwoD_DataLoader):
                  annotations,
                  in_memory=True,
                  memory_loc=None,
-                 compress=False
+                 compress=False,
+                 preloaded=False
                  ):
         
         '''
@@ -57,7 +58,7 @@ class BC_DataLoader(TwoD_DataLoader):
         '''
         
         super().__init__(init_location, label_location, in_memory, memory_loc,
-                         compress)
+                         compress, preloaded)
 
         if type(annotations) == str:
             self.annotations = load_annotations(annotations)

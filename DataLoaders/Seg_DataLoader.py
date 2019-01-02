@@ -23,7 +23,8 @@ class Seg_DataLoader(DataLoader):
                  pad_info=(0,7),
                  in_memory=True,
                  memory_loc=None,
-                 compress=False
+                 compress=False,
+                 preloaded=False
                  ):
         ''' 
         label_location - A folder containing the segmentations to read in.
@@ -46,7 +47,7 @@ class Seg_DataLoader(DataLoader):
         '''
         
         super().__init__(init_location, label_location, in_memory, memory_loc,
-                         compress)
+                         compress, preloaded)
         
         if self.label_location[-1] != '/':
              self.label_location += '/'
