@@ -1,10 +1,4 @@
 # -*- coding: utf-8 -*-
-
-
-
-
-
-
 from DataLoaders.Par_Seg_DataLoader import Par_Seg_DataLoader
 from Generators.Seg_Generator import Seg_Generator
 
@@ -22,8 +16,8 @@ def create_gens(train, test):
                  batch_size = 1,
                  n_classes = 3,
                  shuffle = True,
-                 augment = False,
-                 distort = False,
+                 augment = True,
+                 distort = True,
                  )
 
     test_gen = Seg_Generator(data_points = test,
@@ -57,7 +51,7 @@ for fold in range(folds):
     gen, test_gen = create_gens(train, test)
 
     model = UNet3D_Extra(input_shape = (1, 128, 128, 128), n_labels=2)
-    model.compile(optimizer=keras.optimizers.adam(lr=.001), loss=loss_func)
+    model.compile(optimizer=keras.optimizers.adam(), loss=loss_func)
 
     snapshot = snap.SnapshotCallbackBuilder(epochs, 5, .01)
     model_prefix = 'AAA_Fold-%d' % (fold)
