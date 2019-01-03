@@ -60,7 +60,7 @@ class Par_Seg_DataLoader(Seg_DataLoader):
         else:
             seen = np.ones(np.shape(raw_label))
         
-        return seen.astype('float')
+        return seen.astype('uint8')
       
     
     
