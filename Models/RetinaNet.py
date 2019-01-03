@@ -6,8 +6,10 @@ from keras.models import load_model
 
 
 
-def RetinaNet_Train(bb_name='resnet50', n_classes=1, optimizer=keras.optimizers.adam):
+def RetinaNet_Train(bb_name='resnet50', n_classes=1, optimizer='adam'):
     
+    if optimizer == 'adam':
+        optimizer = keras.optimizers.adam()
 
     bb = RetinaNet.backbone.backbone(bb_name)
     model = bb.retinanet(num_classes=n_classes)
