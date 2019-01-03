@@ -96,7 +96,7 @@ class DataPoint():
             
             return data
         
-    def get_pred_label(self, copy):
+    def get_pred_label(self, copy=False):
         
         if copy:
             return np.copy(self.pred_label)
