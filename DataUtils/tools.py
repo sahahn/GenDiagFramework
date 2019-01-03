@@ -38,7 +38,7 @@ def resample_3d(image, affine, new_shape):
     new_affine[:3, :3] = affine[:3, :3] * scale_factor
     new_affine[:, 3][:3] = affine[:, 3][:3] + (image.shape * np.diag(affine)[:3] * (1 - scale_factor)) / 2
     
-    return image, new_affine
+    return image, new_affine, scale_factor
 
 def determine_crop(label, image, new_shape, pad_limit):
     ''' Returns a mix of crop/resized version of an image
@@ -135,6 +135,7 @@ def determine_crop_3d(scan, ranges, thickness, new_shape, base_pad, axial_pad, a
     '''
     
     a_p = int(axial_pad / thickness)
+    scale_factor = None
     
     d1 = (ranges[4] + base_pad) - (ranges[2] - base_pad)
     d2 = (ranges[5] + base_pad) - (ranges[3] - base_pad)
@@ -176,9 +177,9 @@ def determine_crop_3d(scan, ranges, thickness, new_shape, base_pad, axial_pad, a
     shp = np.shape(scan)
 
     if shp != new_shape:
-        scan, affine = resample_3d(scan, affine, new_shape)
+        scan, affine, scale_factor = resample_3d(scan, affine, new_shape)
 
-    return scan, affine
+    return scan, affine, scale_factor
     
     
     

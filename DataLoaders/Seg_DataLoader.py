@@ -97,7 +97,7 @@ class Seg_DataLoader(DataLoader):
             except:
                 raw_file = nib.load(raw_file_path + '.gz')
             
-            self.data_points[i].set_pixdims(raw_file.header['pixdim'])
+            self.data_points[i].set_pixdims(raw_file.header['pixdim'][1:4])
             
             thickness = self.data_points[i].get_thickness()
             new_shape = config['Seg_input_size'][1:]  #Channels first
@@ -106,8 +106,13 @@ class Seg_DataLoader(DataLoader):
             ranges = self.range_dict[name]
             affine = raw_file.affine
             
-            data, new_affine = determine_crop_3d(data, ranges, thickness,
-                       new_shape, self.pad_info[0], self.pad_info[1], affine)
+            data, new_affine, scale_factor = determine_crop_3d(data, ranges,
+                       thickness, new_shape, self.pad_info[0],
+                       self.pad_info[1], affine)
+            
+            if scale_factor != None:
+                self.data_points[i].update_dims(scale_factor[0], scale_factor[1],
+                                scale_factor[2])
 
             data = np.clip(data, *config['clip_range'])
             data = normalize_data(data)

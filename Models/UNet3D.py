@@ -12,6 +12,9 @@ from keras.layers import Conv3D, MaxPooling3D, UpSampling3D, Activation, BatchNo
 from functools import partial
 from keras.layers import LeakyReLU, Add, SpatialDropout3D
 from keras.layers.merge import concatenate
+from keras.models import load_model
+
+from Metrics.metrics import par_weighted_dice_coefficient_loss, weighted_dice_coefficient_loss, dice_coefficient_loss
     
 K.set_image_data_format("channels_first")
 
@@ -209,5 +212,21 @@ def create_context_module(input_layer, n_level_filters, dropout_rate=0.3, data_f
     dropout = SpatialDropout3D(rate=dropout_rate, data_format=data_format)(convolution1)
     convolution2 = create_convolution_block(input_layer=dropout, n_filters=n_level_filters)
     return convolution2
+
+
+def load_old_model(model_file):
+
+    custom_objects = {'dice_coefficient_loss': dice_coefficient_loss,
+                      'weighted_dice_coefficient_loss': weighted_dice_coefficient_loss,
+                       'par_weighted_dice_coefficient_loss': par_weighted_dice_coefficient_loss}
+    try:
+        from keras_contrib.layers import InstanceNormalization
+        custom_objects["InstanceNormalization"] = InstanceNormalization
+    except ImportError:
+        pass
+    
+        
+    return load_model(model_file, custom_objects=custom_objects)
+  
 
 

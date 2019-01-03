@@ -53,6 +53,9 @@ class DataPoint():
     def set_pixdims(self, pixdims):
         self.pixdims = pixdims
         
+    def update_dims(self, s_scale, c_scale, a_scale):
+        self.pixdims *= [s_scale, c_scale, a_scale]
+        
     def set_pred_label(self, pred_label):
         self.pred_label = pred_label
         
@@ -72,7 +75,7 @@ class DataPoint():
         return self.label
     
     def get_thickness(self):
-        return self.pixdims[3]
+        return self.pixdims[2]
     
     def get_data(self, copy=False):
             
