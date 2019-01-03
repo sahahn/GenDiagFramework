@@ -8,6 +8,7 @@ Created on Thu Dec 13 11:00:27 2018
 from sklearn.model_selection import train_test_split
 from DataLoaders.DataPoint import DataPoint
 from sklearn.model_selection import KFold
+import numpy as np
 
 class DataLoader():
     '''Abstract DataLoader Class'''
@@ -69,7 +70,7 @@ class DataLoader():
     def get_unique_patients(self):
         
         patients = sorted(list(set([dp.get_patient() for dp in self.data_points])))
-        return patients
+        return np.array(patients)
     
     def get_data_points_by_patient(self, patients):
         
@@ -136,8 +137,8 @@ class DataLoader():
         kf = KFold(n_splits=n_splits, random_state=seed)
         
         for train_patients, test_patients in kf.split(patients):
-            self.kf_train_splits.append(train_patients)
-            self.kf_test_splits.append(test_patients)
+            self.kf_train_splits.append(patients[train_patients])
+            self.kf_test_splits.append(patients[test_patients])
             
 
     def get_k_split(self, ind):
