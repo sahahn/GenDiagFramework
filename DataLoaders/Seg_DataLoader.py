@@ -110,7 +110,7 @@ class Seg_DataLoader(DataLoader):
                        thickness, new_shape, self.pad_info[0],
                        self.pad_info[1], affine)
             
-            if scale_factor != None:
+            if scale_factor:
                 self.data_points[i].update_dims(scale_factor[0], scale_factor[1],
                                 scale_factor[2])
 

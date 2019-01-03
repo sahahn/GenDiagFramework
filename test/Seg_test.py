@@ -13,7 +13,7 @@ dl = Seg_DataLoader(
         label_location = '/home/sage/GenDiagFramework/labels/leak_segs/',
         annotations = '/home/sage/GenDiagFramework/labels/annotations.csv',
         in_memory = True,
-        memory_loc = config['memory_loc'] )
+        memory_loc = config['memory_loc'])
 
 train, test = dl.get_train_test_split(.2, 43)
 
