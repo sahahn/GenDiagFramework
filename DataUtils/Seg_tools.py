@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
+from skimage import measure
+from skimage import segmentation
 
 def get_s_e(seg, start_flag):
 
@@ -76,3 +78,57 @@ def get_seen(seg, start_flag):
     
     
     return seen
+
+def fast_process(p):
+    ''' p - Predicted 3D segmentation, with 1 or more classes.
+    
+        Return a post processed version, attempting to remove outliers. This
+        is notably the faster and rougher version for post proccessing segs.'''
+    
+    labels = measure.label(p)
+    highest = np.max(np.unique(labels))
+
+    total = len(labels[labels > -1]) - len(labels[labels==0])
+    
+    for i in range(1, highest+1):
+        percent = len(labels[labels == i]) / total
+        if percent < .05:
+            p[labels == i] = 0
+            
+    return p
+
+def custom_bound(i, labels):
+    
+    l = np.array(labels, copy=True) 
+    l[l != i] = 0
+    
+    return segmentation.find_boundaries(l, connectivity=1, mode='outer', background=0)
+
+
+def process(p):
+    '''p - Predicted 3D segmentation, with 1 or more classes.
+       Return a post processed version, attempting to remove outliers.
+    '''
+    
+    p[p == 0] = 300
+    
+    labels = measure.label(p)
+    highest = np.max(np.unique(labels))
+
+    total = len(labels[labels > -1])
+
+    for i in range(1, highest+1):
+        
+        num = len(labels[labels == i])
+        percent = num / total
+        
+        #Default hard coded param for now...
+        if percent < .01:
+            p[labels == i] = np.argmax(np.bincount(p[custom_bound(i, labels)].astype(np.int)))
+
+    p[p == 300] = 0
+    
+    return p
+
+
+

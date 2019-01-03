@@ -115,6 +115,13 @@ class DataPoint():
             return np.copy(self.affine)
         
         return self.affine
+    
+    def get_pixdims(self, copy):
+        
+        if copy:
+            return np.copy(self.pixdims)
+        
+        return self.pixdims
         
     def clear_data(self):
         
