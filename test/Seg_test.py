@@ -12,7 +12,8 @@ dl = Seg_DataLoader(
         init_location = '/media/sage/data/nifti_endoleak/',
         label_location = '/home/sage/GenDiagFramework/labels/leak_segs/',
         annotations = '/home/sage/GenDiagFramework/labels/annotations.csv',
-        in_memory = True )
+        in_memory = True,
+        memory_loc = config['memory_loc'] )
 
 train, test = dl.get_train_test_split(.2, 43)
 
@@ -42,5 +43,5 @@ callbacks =  [keras.callbacks.ModelCheckpoint(config['model_loc'] + '/model-{epo
 model.fit_generator(generator=gen, validation_data=test_gen,
                             use_multiprocessing=True,
                             workers=8,
-                            epochs=1, 
+                            epochs=50, 
                             callbacks=callbacks)
