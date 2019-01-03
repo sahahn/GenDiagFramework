@@ -43,7 +43,9 @@ model.compile(optimizer=keras.optimizers.adam(lr=.001), loss=loss_func)
 
 model.summary()
 
-callbacks =  [keras.callbacks.ModelCheckpoint(config['model_loc'] + '/model-{epoch:02d}.h5')]
+callbacks =  [keras.callbacks.ModelCheckpoint(config['model_loc'] + '/AAA_Seg-{epoch:02d}.h5',
+                                              monitor='val_loss', save_best_only=True)]
+
 
 model.fit_generator(generator=gen, validation_data=test_gen,
                             use_multiprocessing=True,
