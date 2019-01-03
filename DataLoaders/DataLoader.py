@@ -7,6 +7,7 @@ Created on Thu Dec 13 11:00:27 2018
 """
 from sklearn.model_selection import train_test_split
 from DataLoaders.DataPoint import DataPoint
+from sklearn.model_selection import KFold
 
 class DataLoader():
     '''Abstract DataLoader Class'''
@@ -42,6 +43,9 @@ class DataLoader():
         self.preloaded = preloaded
     
         self.data_points = []
+        
+        self.kf_train_splits = []
+        self.kf_test_splits = []
     
     def load_labels(self):
         pass
@@ -122,6 +126,29 @@ class DataLoader():
         val = self.get_data_points_by_patient(val_patients)
         
         return train, test, val
+    
+    def setup_kfold_splits(self, n_splits, seed):
+        '''Preforms a kfold val_split by patient, and stores the splits.'''
+        
+        self.load_all()
+        patients = self.get_unique_patients()
+        
+        kf = KFold(n_splits=n_splits, random_state=seed)
+        
+        for train_patients, test_patients in kf.split(patients):
+            self.kf_train_splits.append(train_patients)
+            self.kf_test_splits.append(test_patients)
+            
+
+    def get_k_split(self, ind):
+        
+        train_patients = self.kf_train_splits[ind]
+        test_patients = self.kf_test_splits[ind]
+        
+        train = self.get_data_points_by_patient(train_patients)
+        test = self.get_data_points_by_patient(test_patients)
+        
+        return train, test
         
     
 
