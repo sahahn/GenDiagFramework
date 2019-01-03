@@ -17,7 +17,6 @@ dl = Seg_DataLoader(
 
 train, test = dl.get_train_test_split(.2, 43)
 
-
 gen = Seg_Generator(data_points = train,
                  dim=(1, 128, 128, 128),
                  batch_size = 1,
