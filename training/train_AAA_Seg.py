@@ -7,6 +7,7 @@ from Metrics.metrics import par_weighted_dice_coefficient_loss
 import Callbacks.snapshot as snap
 
 import keras
+import numpy as np
 
 main_dr = '/home/sage/GenDiagFramework/'
 loss_func = par_weighted_dice_coefficient_loss
@@ -40,22 +41,22 @@ dl = Par_Seg_DataLoader(
         n_classes=2,
         in_memory = True)
 
-folds = 5
+folds = 2
 epochs = 100
+num_snaps = 5
 
 dl.setup_kfold_splits(folds, 43)
 
-
 #Training
 for fold in range(2, folds):
-    train, test = dl.get_k_split(fold)
     
+    train, test = dl.get_k_split(fold)
     gen, test_gen = create_gens(train, test)
 
     model = UNet3D_Extra(input_shape = (1, 128, 128, 128), n_labels=2)
-    model.compile(optimizer=keras.optimizers.SGD(), loss=loss_func)
+    model.compile(optimizer=keras.optimizers.adam(), loss=loss_func)
 
-    snapshot = snap.SnapshotCallbackBuilder(epochs, 5, .01)
+    snapshot = snap.SnapshotCallbackBuilder(epochs, num_snaps, .01)
     model_prefix = main_dr + 'saved_models/AAA_Fold-%d' % (fold)
         
     model.fit_generator(
@@ -65,6 +66,24 @@ for fold in range(2, folds):
                     epochs=epochs,
                     callbacks=snapshot.get_callbacks(model_prefix=model_prefix)
                     )
+
+
+model = UNet3D_Extra(input_shape = (1, 128, 128, 128), n_labels=2)
+model.compile(optimizer=keras.optimizers.adam(), loss=loss_func)
+
+for fold in range(folds):
+    
+    train, test = dl.get_k_split(fold)
+    gen, test_gen = create_gens(train, test)
+    
+    for s in range(1, num_snaps+1):
+        
+        model.load_weights(main_dr + 'saved_models/AAA_Fold-' + str(fold)
+                           + '-' + str(s) + '.h5')
+        
+        predictions = model.predict_generator(test)
+        print(np.shape(predictions))
+    
     
     
     
