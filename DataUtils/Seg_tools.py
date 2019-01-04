@@ -136,7 +136,7 @@ def proc_prediction(data_point, pred, threshold=.5):
     output = np.zeros(np.shape(pred[0]))
     pred[pred < threshold] = 0
     
-    maxes = np.max(pred)
+    maxes = np.max(pred, axis=0)
     maxes[maxes == 0] = -1
     
     for i in range(len(pred)):
