@@ -6,10 +6,10 @@ from Models.UNet3D import UNet3D_Extra
 from Metrics.metrics import par_weighted_dice_coefficient_loss
 import Callbacks.snapshot as snap
 
-import Metrics.eval_metrics as ev_metrics
+
 import nibabel as nib
 
-from DataUtils.Seg_tools import process
+from DataUtils.Seg_tools import proc_prediction
 
 import keras
 import numpy as np
@@ -46,14 +46,14 @@ dl = Par_Seg_DataLoader(
         n_classes=2,
         in_memory = True)
 
-folds = 2
+folds = 5
 epochs = 100
 num_snaps = 5
 
 dl.setup_kfold_splits(folds, 43)
 
 #Training
-for fold in range(2, folds):
+for fold in range(folds, folds):
     
     train, test = dl.get_k_split(fold)
     gen, test_gen = create_gens(train, test)
@@ -78,8 +78,6 @@ for fold in range(2, folds):
 model = UNet3D_Extra(input_shape = (1, 128, 128, 128), n_labels=2)
 model.compile(optimizer=keras.optimizers.adam(), loss=loss_func)
 
-threshold = .5
-
 for fold in range(folds):
     
     train, test = dl.get_k_split(fold)
@@ -98,26 +96,20 @@ for fold in range(folds):
     
     for i in range(len(test)):
         
+        test[i] = proc_prediction(test[i], preds[i])
+        
         name = test[i].get_name()
         affine = test[i].get_affine()
         
-        pred = preds[i]
+        pred = test[i].get_pred_label()
+        output = np.zeros(np.shape(pred[0]))
         
-        x = np.squeeze(pred[0,])
-        y = np.squeeze(pred[1,])
-        
-        output = np.zeros((128,128,128))
-        
-        x[x < threshold] = 0
-        y[y < threshold] = 0
-    
-        output[x>y] = 1
-        output[y>x] = 2
-        
-        output = process(output)
+        for i in range(len(pred)):
+            output[pred[i] == 1] = i+1
     
         final = nib.Nifti1Image(output, affine)
         final.to_filename(main_dr + 'predictions/' + name + '_pred.nii.gz')
+        
         print(name)
 
         

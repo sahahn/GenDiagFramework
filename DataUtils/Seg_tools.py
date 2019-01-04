@@ -3,6 +3,7 @@
 import numpy as np
 from skimage import measure
 from skimage import segmentation
+import nibabel as nib
 
 def get_s_e(seg, start_flag):
 
@@ -129,6 +130,32 @@ def process(p):
     p[p == 300] = 0
     
     return p
+
+def proc_prediction(data_point, pred, threshold=.5):
+    
+    output = np.zeros(np.shape(pred[0]))
+    pred[pred < threshold] = 0
+    
+    maxes = np.max(pred)
+    maxes[maxes == 0] = -1
+    
+    for i in range(len(pred)):
+        output[pred[i] == maxes] = i+1
+    
+    output = process(output)
+    
+    for i in range(len(pred)):
+        pred[i] = 0
+        pred[i][output == i+1] = 1
+        
+    data_point.set_pred_label(pred)
+    return data_point 
+    
+    
+
+
+    
+
 
 
 
