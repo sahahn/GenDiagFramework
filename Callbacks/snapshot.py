@@ -60,10 +60,9 @@ class SnapshotCallbackBuilder:
         if not os.path.exists('weights/'):
             os.makedirs('weights/')
 
-        callback_list = [callbacks.ModelCheckpoint("weights/%s-Best-{epoch:02d}.h5" % model_prefix, monitor="val_acc",
-                                                    save_best_only=True, save_weights_only=True),
+        callback_list = [
                          callbacks.LearningRateScheduler(schedule=self._cosine_anneal_schedule),
-                         SnapshotModelCheckpoint(self.T, self.M, fn_prefix='weights/%s' % model_prefix)]
+                         SnapshotModelCheckpoint(self.T, self.M, fn_prefix=model_prefix)]
 
         return callback_list
 
