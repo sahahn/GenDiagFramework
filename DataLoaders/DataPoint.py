@@ -109,14 +109,14 @@ class DataPoint():
     def get_slc(self):
         return self.slc
     
-    def get_affine(self, copy):
+    def get_affine(self, copy=False):
         
         if copy:
             return np.copy(self.affine)
         
         return self.affine
     
-    def get_pixdims(self, copy):
+    def get_pixdims(self, copy=False):
         
         if copy:
             return np.copy(self.pixdims)
