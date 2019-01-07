@@ -118,6 +118,8 @@ if EVAL:
                 iou = metrics.IOU(pred[ch], truth[ch])
                 abs_dif, percent_dif = metrics.volume_dif(pred[ch], truth[ch], pixdims)
                 
+                print(name, dc, iou, abs_dif)
+                
 
             if SAVE:
             
