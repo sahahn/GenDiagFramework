@@ -143,8 +143,6 @@ def calculate_max_axial_ap(seg, dims, return_points=False):
     seg, dim = resample_seg(seg, dims)
     seg = seg.transpose(2,0,1)
     
-    print(type(seg[0][0][0]))
-    
     highest = 0
     ind = 0
     

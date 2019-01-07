@@ -148,8 +148,6 @@ def proc_prediction(data_point, pred, threshold=.5):
         pred[i] = 0
         pred[i][output == i+1] = 1
         
-    pred = pred.astype('uint16')
-        
     data_point.set_pred_label(pred)
     return data_point 
     
