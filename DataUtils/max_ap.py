@@ -93,7 +93,6 @@ def get_approx_perp_points(points, a, b, c):
 
             if buffer_cnt == 5:
                 buffer = False
-                buffer_cnt = 0
 
         dif_val += 1
         
