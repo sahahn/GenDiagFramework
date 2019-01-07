@@ -112,29 +112,31 @@ if EVAL:
             truth = test[i].get_label()
             pixdims = test[i].get_pixdims()
             
-            for ch in range(len(pred)):
+            if np.sum(truth[-1]) > (128 * 128 * 128) - 2000:
                 
-                dc = metrics.dice_coef(pred[ch], truth[ch])
-                iou = metrics.IOU(pred[ch], truth[ch])
-                abs_dif, percent_dif = metrics.volume_dif(pred[ch], truth[ch], pixdims)
+                for ch in range(len(pred)):
+                    
+                    dc = metrics.dice_coef(pred[ch], truth[ch])
+                    iou = metrics.IOU(pred[ch], truth[ch])
+                    abs_dif, percent_dif = metrics.volume_dif(pred[ch], truth[ch], pixdims)
+                    
+                    print(name, dc, iou, abs_dif, percent_dif)
+                    
+    
+                if SAVE:
                 
-                print(name, dc, iou, abs_dif)
-                
-
-            if SAVE:
+                    name = test[i].get_name()
+                    affine = test[i].get_affine()
             
-                name = test[i].get_name()
-                affine = test[i].get_affine()
-        
-                output = np.zeros(np.shape(pred[0]))
+                    output = np.zeros(np.shape(pred[0]))
+                    
+                    for i in range(len(pred)):
+                        output[pred[i] == 1] = i+1
                 
-                for i in range(len(pred)):
-                    output[pred[i] == 1] = i+1
-            
-                final = nib.Nifti1Image(output, affine)
-                final.to_filename(main_dr + 'predictions/' + name + '_pred.nii.gz')
-                
-                print('saved ', name)
+                    final = nib.Nifti1Image(output, affine)
+                    final.to_filename(main_dr + 'predictions/' + name + '_pred.nii.gz')
+                    
+                    print('saved ', name)
 
         
         
