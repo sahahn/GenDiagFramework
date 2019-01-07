@@ -132,8 +132,8 @@ if EVAL:
                 AAA_results.append(compute_metrics(pred[0], truth[0], pixdims))
                 Graft_results.append(compute_metrics(pred[1], truth[1], pixdims))
                 
-                both_pred = np.zeros(np.shape(pred[0]))
-                both_truth = np.zeros(np.shape(pred[0]))
+                both_pred = np.zeros(np.shape(pred[0]), dtype=int)
+                both_truth = np.zeros(np.shape(pred[0]), dtype=int)
                 
                 both_pred[pred[0]+pred[1] > 0] = 1
                 both_truth[truth[0]+truth[1] > 0] = 1
