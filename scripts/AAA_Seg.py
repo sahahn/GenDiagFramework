@@ -122,7 +122,7 @@ if EVAL:
             name = test[i].get_name()
             
             #Make sure it is a full scan!
-            if np.sum(truth[-1]) == 128 * 128 * 128 and '287a_pre' not in name:
+            if np.sum(truth[-1]) == 128 * 128 * 128 and '23e_art' not in name:
                 
                 #Sets test pred label to proc. version
                 test[i] = proc_prediction(test[i], preds[i])
