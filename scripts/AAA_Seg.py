@@ -144,8 +144,8 @@ if EVAL:
                 truth_max_ap = calculate_max_axial_ap(both_truth, pixdims)
                 
                 print(name)
-                print(round(pred_max_ap))
-                print(round(truth_max_ap))
+                print([round(j) for j in pred_max_ap])
+                print([round(j) for j in truth_max_ap])
                 print()
                 
     
