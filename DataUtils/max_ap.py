@@ -84,8 +84,6 @@ def get_approx_perp_points(points, a, b, c):
             pred_y = int(round(get_y(a,b,c,p[1])))
             dif = abs(pred_y - p[0])
             
-            print(buffer)
-
             if dif < dif_val and not buffer:
                 perps.append(p)
                 buffer = True
