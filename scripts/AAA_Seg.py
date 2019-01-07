@@ -142,7 +142,7 @@ if EVAL:
                 
                 #print(name, AAA_results[-1], Graft_results[-1], Both_results[-1])
                 
-                print(pixdims)
+                print(name, pixdims)
                 pred_max_ap = calculate_max_axial_ap(both_pred, pixdims)
                 truth_max_ap = calculate_max_axial_ap(both_truth, pixdims)
                 
