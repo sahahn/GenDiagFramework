@@ -26,3 +26,14 @@ def volume(data, pixdims):
     mL = cubic_mm * 0.001
     
     return mL
+
+def volume_dif(pred, label, pixdims):
+    
+    pred_volume = volume(pred, pixdims)
+    label_volume = volume(label, pixdims)
+    
+    dif = abs(label_volume - pred_volume)
+    percent_dif = dif / label_volume
+    
+    return dif, percent_dif
+                        

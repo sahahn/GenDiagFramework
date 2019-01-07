@@ -5,7 +5,6 @@ from Generators.Seg_Generator import Seg_Generator
 from Models.UNet3D import UNet3D_Extra
 from Metrics.metrics import weighted_dice_coefficient_loss
 from config import config
-import Callbacks.snapshot as snap
 
 import keras
 

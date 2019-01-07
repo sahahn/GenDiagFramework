@@ -4,6 +4,7 @@ from Generators.Seg_Generator import Seg_Generator
 
 from Models.UNet3D import UNet3D_Extra
 from Metrics.metrics import par_weighted_dice_coefficient_loss
+import Metrics.eval_metrics as metrics
 import Callbacks.snapshot as snap
 
 
@@ -105,14 +106,24 @@ if EVAL:
             #Sets test pred label to proc. version
             test[i] = proc_prediction(test[i], preds[i])
             
+            name = test[i].get_name()
             
+            pred = test[i].get_pred_label()
+            truth = test[i].get_label()
+            pixdims = test[i].get_pixdims()
             
+            for ch in range(len(pred)):
+                
+                dc = metrics.dice_coef(pred[ch], truth[ch])
+                iou = metrics.IOU(pred[ch], truth[ch])
+                abs_dif, percent_dif = metrics.volume_dif(pred[ch], truth[ch], pixdims)
+                
+
             if SAVE:
             
                 name = test[i].get_name()
                 affine = test[i].get_affine()
-                
-                pred = test[i].get_pred_label()
+        
                 output = np.zeros(np.shape(pred[0]))
                 
                 for i in range(len(pred)):
