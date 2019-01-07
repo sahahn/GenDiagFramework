@@ -20,7 +20,7 @@ loss_func = par_weighted_dice_coefficient_loss
 
 TRAIN = False
 EVAL = True
-SAVE = True
+SAVE = False
 
 def create_gens(train, test):
     
@@ -140,13 +140,12 @@ if EVAL:
                 
                 Both_results.append(compute_metrics(both_pred, both_truth, pixdims))
                 
-                print(name, AAA_results[-1], Graft_results[-1], Both_results[-1])
-                
                 pred_max_ap = calculate_max_axial_ap(both_pred, pixdims)
                 truth_max_ap = calculate_max_axial_ap(both_truth, pixdims)
                 
-                print(pred_max_ap)
-                print(truth_max_ap)
+                print(name)
+                print(round(pred_max_ap))
+                print(round(truth_max_ap))
                 print()
                 
     
