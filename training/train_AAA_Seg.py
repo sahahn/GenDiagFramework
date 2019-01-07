@@ -53,7 +53,7 @@ num_snaps = 5
 dl.setup_kfold_splits(folds, 43)
 
 #Training
-for fold in range(folds, folds):
+for fold in range(2, folds):
     
     train, test = dl.get_k_split(fold)
     gen, test_gen = create_gens(train, test)
