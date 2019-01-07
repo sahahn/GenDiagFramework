@@ -146,7 +146,6 @@ if EVAL:
                 pred_max_ap = calculate_max_axial_ap(both_pred, pixdims)
                 truth_max_ap = calculate_max_axial_ap(both_truth, pixdims)
                 
-                print(name)
                 print(pred_max_ap)
                 print(truth_max_ap)
                 print()
