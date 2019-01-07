@@ -106,8 +106,8 @@ def get_max_ap(seg_slice, pix_dim, return_points=False):
     dt[dt > 1] = 0
     points = np.transpose((dt == 1).nonzero())
     
-    #Slice must have atleast 4 valid points
-    if len(points) <= 4:
+    #Slice must have atleast say 10 valid points
+    if len(points) <= 10:
         return (0,0)
     
     #Calculate the points with the max_dist
@@ -142,6 +142,8 @@ def calculate_max_axial_ap(seg, dims, return_points=False):
     
     seg, dim = resample_seg(seg, dims)
     seg = seg.transpose(2,0,1)
+    
+    print(np.sum(seg))
     
     highest = 0
     ind = 0
