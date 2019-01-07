@@ -140,13 +140,15 @@ if EVAL:
                 
                 Both_results.append(compute_metrics(both_pred, both_truth, pixdims))
                 
-                print(name, AAA_results[-1], Graft_results[-1], Both_results[-1])
+                #print(name, AAA_results[-1], Graft_results[-1], Both_results[-1])
                 
                 pred_max_ap = calculate_max_axial_ap(both_pred, pixdims)
                 truth_max_ap = calculate_max_axial_ap(both_truth, pixdims)
                 
+                print(name)
                 print(pred_max_ap)
                 print(truth_max_ap)
+                print()
                 
     
                 if SAVE:
@@ -164,9 +166,15 @@ if EVAL:
                     final.to_filename(main_dr + 'predictions/' + name + '_pred.nii.gz')
                     
                     print('saved ', name)
-
     
-        
+    print('AAA Means = ', np.mean(AAA_results, axis=0))
+    print('AAA stds = ', np.std(AAA_results, axis=0))
+    
+    print('Graft Means = ', np.mean(Graft_results, axis=0))
+    print('Graft stds = ', np.std(Graft_results, axis=0))
+    
+    print('Both Means = ', np.mean(Both_results, axis=0))
+    print('Both stds = ', np.std(Both_results, axis=0))
 
     
     
