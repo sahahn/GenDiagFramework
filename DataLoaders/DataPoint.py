@@ -54,7 +54,7 @@ class DataPoint():
         self.pixdims = pixdims
         
     def update_dims(self, s_scale, c_scale, a_scale):
-        self.pixdims *= [s_scale, c_scale, a_scale]
+        self.pixdims /= [s_scale, c_scale, a_scale]
         
     def set_pred_label(self, pred_label):
         self.pred_label = pred_label
