@@ -3,7 +3,7 @@
 from DataLoaders.Seg_DataLoader import Seg_DataLoader
 from Generators.Seg_Generator import Seg_Generator
 from Models.UNet3D import UNet3D_Extra
-from Metrics.metrics import dice_coefficient_loss
+from Metrics.metrics import weighted_dice_coefficient_loss
 from config import config
 import Callbacks.snapshot as snap
 
@@ -15,7 +15,7 @@ EVAL = True
 SAVE = False
 
 main_dr = '/home/sage/GenDiagFramework/'
-loss_func = dice_coefficient_loss
+loss_func = weighted_dice_coefficient_loss
 
 dl = Seg_DataLoader(
         init_location = '/media/sage/data/nifti_endoleak/',
@@ -44,32 +44,27 @@ def create_gens(train, test):
    
    return gen, test_gen
 
-
-
 folds = 5
-epochs = 100
-num_snaps = 5
+epochs = 30
 
 dl.setup_kfold_splits(folds, 43)
 
 if TRAIN:
-    for fold in range(2, folds):
+    for fold in range(0, folds):
         
         train, test = dl.get_k_split(fold)
         gen, test_gen = create_gens(train, test)
     
         model = UNet3D_Extra(input_shape = (1, 128, 128, 128), n_labels=1)
-        model.compile(optimizer=keras.optimizers.adam(), loss=loss_func)
-    
-        snapshot = snap.SnapshotCallbackBuilder(epochs, num_snaps, .01)
-        model_prefix = main_dr + 'saved_models/Leak_Fold-%d' % (fold)
+        model.compile(optimizer=keras.optimizers.adam(.001), loss=loss_func)
             
         model.fit_generator(
                         generator=gen,
                         use_multiprocessing=True,
                         workers=8,
-                        epochs=epochs,
-                        callbacks=snapshot.get_callbacks(model_prefix=model_prefix)
+                        epochs=epochs
                         )
+        
+        model.save_weights(main_dr + 'saved_models/AAA' + str(folds) + '.h5')
 
 
