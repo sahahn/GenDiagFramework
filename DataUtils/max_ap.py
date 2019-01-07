@@ -143,14 +143,18 @@ def calculate_max_axial_ap(seg, dims, return_points=False):
     seg, dim = resample_seg(seg, dims)
     seg = seg.transpose(2,0,1)
     
-    print(np.sum(seg))
+    print(seg)
     
     highest = 0
     ind = 0
     
     for i in range(len(seg)):
-        d1,d2 = get_max_ap(seg[i], dim)
-        print(d1, d2)
+        
+        try:
+            d1,d2 = get_max_ap(seg[i], dim)
+        except:
+            d1,d2 = 0,0
+        
         
         #In basic attempt to avoid edge cases... find highest of both lines
         if d1+d2 > highest:
