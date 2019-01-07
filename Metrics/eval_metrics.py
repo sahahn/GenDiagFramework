@@ -33,7 +33,7 @@ def volume_dif(pred, label, pixdims):
     label_volume = volume(label, pixdims)
     
     dif = abs(label_volume - pred_volume)
-    percent_dif = dif / label_volume
+    percent_dif = abs(dif / label_volume)
     
     return dif, percent_dif
                         

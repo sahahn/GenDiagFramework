@@ -140,9 +140,8 @@ if EVAL:
                 
                 Both_results.append(compute_metrics(both_pred, both_truth, pixdims))
                 
-                #print(name, AAA_results[-1], Graft_results[-1], Both_results[-1])
+                print(name, AAA_results[-1], Graft_results[-1], Both_results[-1])
                 
-                print(name)
                 pred_max_ap = calculate_max_axial_ap(both_pred, pixdims)
                 truth_max_ap = calculate_max_axial_ap(both_truth, pixdims)
                 
