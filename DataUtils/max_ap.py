@@ -133,15 +133,11 @@ def get_max_ap(seg_slice, pix_dim, return_points=False):
     
     return d1,d2
 
-def calculate_max_axial_ap(dp, return_points=False):
-    '''Given a data point in standard format - representing a 3D segmentation
-       with label == a 3D segmentation saved as [sag, cor, axial], return two
+def calculate_max_axial_ap(seg, dims, return_points=False):
+    '''Given a seg as a 3D segmentation saved as [sag, cor, axial], return two
        measurements corresponding to Max AP. Optionally return the coordinates
        of the two lines'''
-       
-    seg = dp.get_data(True)
-    dims = dp.get_pixdims(True)
-    
+
     seg[seg>0] = 1
     
     seg, dim = resample_seg(seg, dims)
