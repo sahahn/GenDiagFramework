@@ -20,7 +20,7 @@ loss_func = par_weighted_dice_coefficient_loss
 
 TRAIN = False
 EVAL = True
-SAVE = False
+SAVE = True
 
 def create_gens(train, test):
     
@@ -119,13 +119,13 @@ if EVAL:
         for i in range(len(test)):
             
             truth = test[i].get_label(copy=True)
+            name = test[i].get_name()
             
             #Make sure it is a full scan!
-            if np.sum(truth[-1]) == 128 * 128 * 128:
+            if np.sum(truth[-1]) == 128 * 128 * 128 and '287a_pre' not in name:
                 
                 #Sets test pred label to proc. version
                 test[i] = proc_prediction(test[i], preds[i])
-                name = test[i].get_name()
                 pred = test[i].get_pred_label(copy=True)
                 pixdims = test[i].get_pixdims()
                 
