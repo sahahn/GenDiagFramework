@@ -121,7 +121,7 @@ if EVAL:
             truth = test[i].get_label(copy=True)
             
             #Make sure it is a full scan!
-            if np.sum(truth[-1]) > (128 * 128 * 128) - 2000:
+            if np.sum(truth[-1]) == 128 * 128 * 128:
                 
                 #Sets test pred label to proc. version
                 test[i] = proc_prediction(test[i], preds[i])
