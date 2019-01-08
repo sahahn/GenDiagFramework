@@ -64,6 +64,6 @@ if TRAIN:
                         epochs=epochs
                         )
         
-        model.save_weights(main_dr + 'saved_models/AAA' + str(folds) + '.h5')
+        model.save_weights(main_dr + 'saved_models/Leak-' + str(fold) + '.h5')
 
 
