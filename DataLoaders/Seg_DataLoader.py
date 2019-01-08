@@ -46,7 +46,7 @@ class Seg_DataLoader(DataLoader):
                      ensure that the pad_info matches the saved format,
                      **important**
         neg_list - Optionally provide the file path to a text file - to load in
-                   blank segmentations
+                   blank segmentations, or a list of names to load in.
         
         '''
         
@@ -96,13 +96,21 @@ class Seg_DataLoader(DataLoader):
     def load_neg_labels(self):
         '''Function designed to load blank labels from a txt file'''
         
-        with open (self.neg_list, 'r') as f:
-            lines = f.readlines()
+        names = []
+        if type(self.neg_list) != list:
+    
+            with open (self.neg_list, 'r') as f:
+                lines = f.readlines()
+                
+                for line in lines:
+                    names.append(line.strip())
+                    
+        else:
+            names = self.neg_list
             
-            for line in lines:
-                name = line.strip()
-                label = np.zeros((self.n_classes, *config['Seg_input_size'][1:]))
-                self.data_points.append(self.create_data_point(name, label))
+        for name in names:
+            label = np.zeros((self.n_classes, *config['Seg_input_size'][1:]))
+            self.data_points.append(self.create_data_point(name, label))
             
     def load_data(self):
         
