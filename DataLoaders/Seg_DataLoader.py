@@ -101,12 +101,7 @@ class Seg_DataLoader(DataLoader):
             
             for line in lines:
                 name = line.strip()
-                
-                if self.label_type == 'crop':
-                    label = np.zeros((self.n_classes, *config['Seg_input_size'][1:]))
-                else:
-                    label = np.zeros((config['Seg_input_size'][1:]))
-                
+                label = np.zeros((self.n_classes, *config['Seg_input_size'][1:]))
                 self.data_points.append(self.create_data_point(name, label))
             
     def load_data(self):
@@ -147,9 +142,10 @@ class Seg_DataLoader(DataLoader):
             self.data_points[i].set_data(data)
             self.data_points[i].set_affine(new_affine)
             
+            label =  self.data_points[i].get_label()
+            
             #If label type is full, must resize labels
-            if self.label_type == 'full':
-                label =  self.data_points[i].get_label()
+            if self.label_type == 'full' and np.sum(label) != 0:
                 
                 #If one channel, must add by default new channel first
                 if self.n_classes == 1:
