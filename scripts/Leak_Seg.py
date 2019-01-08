@@ -7,15 +7,15 @@ from Metrics.metrics import weighted_dice_coefficient_loss
 from config import config
 import nibabel as nib
 import Metrics.eval_metrics as metrics
+import numpy as np
 
 import keras
 
-def compute_metrics(pred, truth, pixdims):
+def compute_metrics(pred, truth):
      dc = metrics.dice_coef(pred, truth)
      iou = metrics.IOU(pred, truth)
-     abs_dif, percent_dif = metrics.volume_dif(pred, truth, pixdims)
      
-     return [dc, iou, abs_dif, percent_dif]
+     return [dc, iou]
 
 def create_gens(train, test):
     
@@ -87,16 +87,16 @@ if EVAL:
         seg_key='garbage', #Don't want it to get anything
         neg_list = main_dr + 'labels/neg_leak_list.txt',
         in_memory = False,
-        memory_loc = config['memory_loc'])
+        memory_loc = config['memory_loc'],
+        preloaded=True)
     
     dl_negs.setup_kfold_splits(folds, 43)
     
     model = UNet3D_Extra(input_shape = (1, 128, 128, 128), n_labels=1)
     model.compile(optimizer=keras.optimizers.adam(.001), loss=loss_func)
     
-    pre_results = []
-    post_results = []
-
+    results = []
+    
     for fold in range(folds):
         
         train, test = dl.get_k_split(fold)
@@ -115,17 +115,17 @@ if EVAL:
             
             name = test[p].get_name()
             pixdims = test[p].get_pixdims()
-            truth = test[p].get_label(copy=True)
-            pred = preds[p]
             
-            print(name)
-            pre_results.append(compute_metrics(pred, truth, pixdims))
-            print(pre_results[-1])
+            truth = np.squeeze(test[p].get_label(copy=True))
+            pred = np.sqeeuze(preds[p])
             
             pred[pred > threshold] = 1
-            post_results.append(compute_metrics(pred, truth, pixdims))
-            print(post_results[-1])
-            print()
+            results.append(compute_metrics(pred, truth, pixdims))
+            
+            print(name)
+            print(metrics.volume(pred, pixdims), metrics.volume(truth, pixdims))
+            print(results[-1])
+            print('----')
             
             if SAVE:
                 affine = test[p].get_affine()
