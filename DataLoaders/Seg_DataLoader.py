@@ -101,7 +101,7 @@ class Seg_DataLoader(DataLoader):
             
             for line in lines:
                 name = line.strip()
-                label = np.zeros(self.n_classes, *config['Seg_input_size'][1:])
+                label = np.zeros((self.n_classes, *config['Seg_input_size'][1:]))
                 
                 self.data_points.append(self.create_data_point(name, label))
             
