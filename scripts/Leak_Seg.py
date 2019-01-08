@@ -120,7 +120,7 @@ if EVAL:
             pred = np.squeeze(preds[p])
             
             pred[pred > threshold] = 1
-            results.append(compute_metrics(pred, truth, pixdims))
+            results.append(compute_metrics(pred, truth))
             
             print(name)
             print(metrics.volume(pred, pixdims), metrics.volume(truth, pixdims))
