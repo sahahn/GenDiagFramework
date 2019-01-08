@@ -38,8 +38,8 @@ def create_gens(train, test):
    return gen, test_gen
 
 
-TRAIN = False
-EVAL = True
+TRAIN = True
+EVAL = False
 SAVE = True
 
 main_dr = '/home/sage/GenDiagFramework/'
@@ -49,7 +49,8 @@ dl = Seg_DataLoader(
         init_location = '/media/sage/data/nifti_endoleak/',
         label_location =  main_dr + 'labels/leak_segs/',
         annotations = main_dr + 'labels/annotations.csv',
-        in_memory = True,
+        neg_list = main_dr + 'labels/neg_leak_list.txt',
+        in_memory = False,
         memory_loc = config['memory_loc'])
 
 
@@ -79,19 +80,6 @@ if TRAIN:
         
 if EVAL:
     
-    dl_negs = Seg_DataLoader(
-        init_location = '/media/sage/data/nifti_endoleak/',
-        label_location =  main_dr + 'labels/leak_segs/',
-        annotations = main_dr + 'labels/annotations.csv',
-        label_type='crop', #Since just zeros dont resize
-        seg_key='garbage', #Don't want it to get anything
-        neg_list = main_dr + 'labels/neg_leak_list.txt',
-        in_memory = False,
-        memory_loc = config['memory_loc'],
-        preloaded=False)
-    
-    dl_negs.setup_kfold_splits(folds, 43)
-    
     model = UNet3D_Extra(input_shape = (1, 128, 128, 128), n_labels=1)
     model.compile(optimizer=keras.optimizers.adam(.001), loss=loss_func)
     
@@ -100,10 +88,6 @@ if EVAL:
     for fold in range(folds):
         
         train, test = dl.get_k_split(fold)
-        train_negs, test_negs = dl_negs.get_k_split(fold)
-        
-        train = train + train_negs
-        test = test + test_negs
         
         gen, test_gen = create_gens(train, test)
         model.load_weights(main_dr + 'saved_models/Leak-' + str(fold) + '.h5')
@@ -120,6 +104,7 @@ if EVAL:
             pred = np.squeeze(preds[p])
             
             pred[pred > threshold] = 1
+            pred[pred < threshold] = 0
             results.append(compute_metrics(pred, truth))
             
             print(name)
@@ -132,6 +117,10 @@ if EVAL:
             
                 final = nib.Nifti1Image(pred, affine)
                 final.to_filename(main_dr + 'predictions/' + name + '_endo_pred.nii.gz')
+                
+                
+    print('Leak Means = ', np.mean(results, axis=0))
+    print('Leak stds = ', np.std(results, axis=0))
         
         
         
