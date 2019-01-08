@@ -21,6 +21,7 @@ class Seg_DataLoader(DataLoader):
                  seg_key='endo',
                  n_classes=1,
                  pad_info=(0,7),
+                 neg_list=None,
                  in_memory=True,
                  memory_loc=None,
                  compress=False,
@@ -44,6 +45,9 @@ class Seg_DataLoader(DataLoader):
         pad_info - (base_pad, axial_pad), if label_type = 'crop', then
                      ensure that the pad_info matches the saved format,
                      **important**
+        neg_list - Optionally provide the file path to a text file - to load in
+                   blank segmentations
+        
         '''
         
         super().__init__(init_location, label_location, in_memory, memory_loc,
@@ -56,6 +60,7 @@ class Seg_DataLoader(DataLoader):
         self.pad_info = pad_info
         self.seg_key = seg_key
         self.n_classes = n_classes
+        self.neg_list = neg_list
         
         #If a location, load annotations from location, otherwise
         #assume annotations are a list of datapoint and load ranges.
@@ -68,10 +73,12 @@ class Seg_DataLoader(DataLoader):
             
     def load_labels(self):
         
+        if self.neg_list:
+            self.load_neg_labels()
+        
         seg_files = [file for file in os.listdir(self.label_location) if
                      self.seg_key in file]
 
-        
         for file in seg_files:
         
             name = file.split('.')[0].replace('_' + self.seg_key, '') 
@@ -84,6 +91,19 @@ class Seg_DataLoader(DataLoader):
                 label = np.array(self.load_multiclass_seg(label))
                 
             self.data_points.append(self.create_data_point(name, label))
+            
+        
+    def load_neg_labels(self):
+        '''Function designed to load blank labels from a txt file'''
+        
+        with open (self.neg_list, 'r') as f:
+            lines = f.readlines()
+            
+            for line in lines:
+                name = line.strip()
+                label = np.zeros(self.n_classes, *config['Seg_input_size'][1:])
+                
+                self.data_points.append(self.create_data_point(name, label))
             
     def load_data(self):
         
