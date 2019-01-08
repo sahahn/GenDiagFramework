@@ -117,7 +117,7 @@ if EVAL:
             pixdims = test[p].get_pixdims()
             
             truth = np.squeeze(test[p].get_label(copy=True))
-            pred = np.sqeeuze(preds[p])
+            pred = np.squeeze(preds[p])
             
             pred[pred > threshold] = 1
             results.append(compute_metrics(pred, truth, pixdims))
