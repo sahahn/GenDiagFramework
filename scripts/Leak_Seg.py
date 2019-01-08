@@ -88,7 +88,7 @@ if EVAL:
         neg_list = main_dr + 'labels/neg_leak_list.txt',
         in_memory = False,
         memory_loc = config['memory_loc'],
-        preloaded=True)
+        preloaded=False)
     
     dl_negs.setup_kfold_splits(folds, 43)
     
@@ -123,7 +123,7 @@ if EVAL:
             results.append(compute_metrics(pred, truth))
             
             print(name)
-            print(metrics.volume(pred, pixdims), metrics.volume(truth, pixdims))
+            #print(metrics.volume(pred, pixdims), metrics.volume(truth, pixdims))
             print(results[-1])
             print('----')
             
