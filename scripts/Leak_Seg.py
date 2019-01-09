@@ -67,8 +67,8 @@ if TRAIN:
         
         train, test = dl.get_k_split(fold)
 
-        for t in train:
-            print(np.shape(t.get_label()), t.get_name())
+        #for t in train:
+        #    print(np.shape(t.get_label()), t.get_name())
 
         gen, test_gen = create_gens(train, test)
     
@@ -76,7 +76,7 @@ if TRAIN:
         model.compile(optimizer=keras.optimizers.adam(.001), loss=loss_func)
         
         callbacks = get_callbacks(model_file = main_dr + 'saved_models/Leak-' + str(fold) + '.h5',
-                                  initial_learning_rate=5e-4,
+                                  initial_learning_rate=5e-3,
                                   learning_rate_drop=.5,
                                   learning_rate_epochs=None,
                                   learning_rate_patience=10,
