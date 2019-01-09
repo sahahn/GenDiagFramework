@@ -14,8 +14,11 @@ import itertools
 def scale_image(image, scale_factor):
     scale_factor = np.asarray(scale_factor)
     new_affine = np.copy(image.affine)
-    new_affine[:3, :3] = image.affine[:3, :3] * scale_factor
-    new_affine[:, 3][:3] = image.affine[:, 3][:3] + (image.shape * np.diag(image.affine)[:3] * (1 - scale_factor)) / 2
+    try:
+        new_affine[:3, :3] = image.affine[:3, :3] * scale_factor
+        new_affine[:, 3][:3] = image.affine[:, 3][:3] + (image.shape * np.diag(image.affine)[:3] * (1 - scale_factor)) / 2
+    except:
+        print('weird...')
     return new_img_like(image, data=image.get_data(), affine=new_affine)
 
 

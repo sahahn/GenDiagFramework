@@ -51,7 +51,8 @@ dl = Seg_DataLoader(
         annotations = main_dr + 'labels/annotations.csv',
         neg_list = main_dr + 'labels/neg_leak_list.txt',
         in_memory = False,
-        memory_loc = config['memory_loc'])
+        memory_loc = config['memory_loc'],
+        preloaded=False)
 
 
 folds = 5
@@ -64,6 +65,10 @@ if TRAIN:
     for fold in range(0, folds):
         
         train, test = dl.get_k_split(fold)
+
+        for t in train:
+            print(np.shape(t.get_label()), t.get_name())
+
         gen, test_gen = create_gens(train, test)
     
         model = UNet3D_Extra(input_shape = (1, 128, 128, 128), n_labels=1)
@@ -71,8 +76,8 @@ if TRAIN:
             
         model.fit_generator(
                         generator=gen,
-                        use_multiprocessing=True,
-                        workers=8,
+                        use_multiprocessing=False,
+                        workers=1,
                         epochs=epochs
                         )
         

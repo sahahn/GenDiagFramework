@@ -1,6 +1,7 @@
 labels/
 saved_models/
 predictions/
+*nohup.out
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
