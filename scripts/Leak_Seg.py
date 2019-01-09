@@ -76,7 +76,7 @@ if TRAIN:
         model.compile(optimizer=keras.optimizers.adam(.001), loss=loss_func)
         
         callbacks = get_callbacks(model_file = main_dr + 'saved_models/Leak-' + str(fold) + '.h5',
-                                  initial_learning_rate=5e-4,
+                                  initial_learning_rate=5e-3,
                                   learning_rate_drop=.5,
                                   learning_rate_epochs=None,
                                   learning_rate_patience=10,
