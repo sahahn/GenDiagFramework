@@ -7,6 +7,7 @@ from Metrics.metrics import weighted_dice_coefficient_loss
 from config import config
 import nibabel as nib
 import Metrics.eval_metrics as metrics
+from Callbacks.LR_decay import get_callbacks
 import numpy as np
 
 import keras
@@ -24,8 +25,8 @@ def create_gens(train, test):
                  batch_size = 1,
                  n_classes = 1,
                  shuffle = True,
-                 augment = True,
-                 distort = True,
+                 augment = False,
+                 distort = False,
                  )
 
    test_gen = Seg_Generator(data_points = test,
@@ -73,15 +74,24 @@ if TRAIN:
     
         model = UNet3D_Extra(input_shape = (1, 128, 128, 128), n_labels=1)
         model.compile(optimizer=keras.optimizers.adam(.001), loss=loss_func)
+        
+        callbacks = get_callbacks(model_file = main_dr + 'saved_models/Leak-' + str(fold) + '.h5',
+                                  initial_learning_rate=5e-4,
+                                  learning_rate_drop=.5,
+                                  learning_rate_epochs=None,
+                                  learning_rate_patience=10,
+                                  verbosity=1,
+                                  early_stopping_patience=30)
             
         model.fit_generator(
                         generator=gen,
-                        use_multiprocessing=False,
-                        workers=1,
-                        epochs=epochs
-                        )
+                        validation_data=test_gen,
+                        use_multiprocessing=True,
+                        workers=8,
+                        epochs=epochs,
+                        callbacks = callbacks)
         
-        model.save_weights(main_dr + 'saved_models/Leak-' + str(fold) + '.h5')
+        #model.save_weights(main_dr + 'saved_models/Leak-' + str(fold) + '.h5')
         
 if EVAL:
     
