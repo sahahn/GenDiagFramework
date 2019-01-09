@@ -137,15 +137,15 @@ class Seg_DataLoader(DataLoader):
                        thickness, new_shape, self.pad_info[0],
                        self.pad_info[1], affine)
             
+            #Update the scaling factor - unless no resampling was done, then just skip
             try:
                 self.data_points[i].update_dims(scale_factor[0], scale_factor[1],
                                 scale_factor[2])
             except:
                 pass
 
-            data = np.clip(data, *config['clip_range'])
-            data = normalize_data(data)
-            data = np.expand_dims(data, axis=0) #Channels first by default 
+           
+            data = self.initial_preprocess(data)
             
             self.data_points[i].set_data(data)
             self.data_points[i].set_affine(new_affine)
@@ -173,8 +173,18 @@ class Seg_DataLoader(DataLoader):
                                 affine)[0] for channel in label ]
             
                     self.data_points[i].set_label(np.array(new_label))
-                
-            
+                    
+                    
+    def initial_preprocess(self, data):
+        '''Given data as input, preform standard preprocessing as clipping,
+           normalizing then expanding the dimensions - and return proc. copy'''
+        
+        data = np.clip(data, *config['clip_range'])
+        data = normalize_data(data)
+        data = np.expand_dims(data, axis=0) #Channels first by default 
+        
+        return data
+        
     def load_multiclass_seg(self, raw_label):
         '''From a raw segmentation with multiple classes, return a
            list containing seperate segmentation channel converted to 1.
