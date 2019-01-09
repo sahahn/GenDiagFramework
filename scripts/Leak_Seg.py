@@ -50,8 +50,8 @@ dl = Seg_DataLoader(
         init_location = '/media/sage/data/nifti_endoleak/',
         label_location =  main_dr + 'labels/leak_segs/',
         annotations = main_dr + 'labels/annotations.csv',
-        neg_list = main_dr + 'labels/neg_leak_list.txt',
-        in_memory = False,
+        neg_list = None,
+        in_memory = True,
         memory_loc = config['memory_loc'],
         preloaded=False)
 
