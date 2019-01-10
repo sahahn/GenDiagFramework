@@ -28,7 +28,7 @@ def pred_AAA(names):
         seg_key='Garbage',
         n_classes=2,
         neg_list = names,
-        in_memory = True)
+        in_memory = False)
     
     to_eval = dl.get_all()
     

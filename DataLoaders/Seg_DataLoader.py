@@ -103,8 +103,7 @@ class Seg_DataLoader(DataLoader):
                 lines = f.readlines()
                 
                 for line in lines:
-                    if 'pre' not in line:
-                        names.append(line.strip())
+                    names.append(line.strip())
                     
         else:
             names = self.neg_list

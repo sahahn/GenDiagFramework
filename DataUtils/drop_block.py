@@ -252,53 +252,32 @@ class DropBlock3D(keras.layers.Layer):
                
     def _compute_valid_seed_region(self, height, width, depth):
         positions = K.concatenate([
-            K.expand_dims(K.tile(K.expand_dims(K.arange(height), axis=1), [1, width, depth]), axis=-1),
-            K.expand_dims(K.tile(K.expand_dims(K.arange(width), axis=0), [height, 1]), axis=-1),
-            K.expand_dims(K.tile(K.expand_dims(K.arange(width), axis=0), [height, width, depth]), axis=-1),
-        ], axis=-1)
-        
+            K.expand_dims(K.tile(K.expand_dims(K.expand_dims(K.arange(height), axis=0), axis=0), [depth, width, 1]), axis=-1),
+            K.expand_dims(K.tile(K.expand_dims(K.expand_dims(K.arange(width), axis=1), axis=0), [depth, 1, height]), axis=-1),
+            K.expand_dims(K.tile(K.expand_dims(K.expand_dims(K.arange(depth), axis=1), axis=1), [1, width, height]), axis=-1)
+                ], axis=-1)
 
-    def _compute_valid_seed_region(self, height, width):
-        positions = K.concatenate([
-            K.expand_dims(K.tile(K.expand_dims(K.arange(height), axis=1), [1, width]), axis=-1),
-            K.expand_dims(K.tile(K.expand_dims(K.arange(width), axis=0), [height, 1]), axis=-1),
-        ], axis=-1)
         half_block_size = self.block_size // 2
+   
         valid_seed_region = K.switch(
             K.all(
                 K.stack(
                     [
-                        positions[:, :, 0] >= half_block_size,
-                        positions[:, :, 1] >= half_block_size,
-                        positions[:, :, 0] < height - half_block_size,
-                        positions[:, :, 1] < width - half_block_size,
+                        positions[:, :, :, 0] >= half_block_size,
+                        positions[:, :, :, 1] >= half_block_size,
+                        positions[:, :, :, 2] >= half_block_size,
+                        positions[:, :, :, 0] < height - half_block_size,
+                        positions[:, :, :, 1] < width - half_block_size,
+                        positions[:, :, :, 2] < depth - half_block_size,
                     ],
                     axis=-1,
                 ),
                 axis=-1,
             ),
-            K.ones((height, width)),
-            K.zeros((height, width)),
+            K.ones((height, width, depth)),
+            K.zeros((height, width, depth)),
         )
-        return K.expand_dims(K.expand_dims(valid_seed_region, axis=0), axis=-1)
-    
-    def _compute_valid_seed_region(self, seq_length):
-        positions = K.arange(seq_length)
-        half_block_size = self.block_size // 2
-        valid_seed_region = K.switch(
-            K.all(
-                K.stack(
-                    [
-                        positions >= half_block_size,
-                        positions < seq_length - half_block_size,
-                    ],
-                    axis=-1,
-                ),
-                axis=-1,
-            ),
-            K.ones((seq_length,)),
-            K.zeros((seq_length,)),
-        )
+
         return K.expand_dims(K.expand_dims(valid_seed_region, axis=0), axis=-1)
 
     def _compute_drop_mask(self, shape):
