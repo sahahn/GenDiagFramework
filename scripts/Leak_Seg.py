@@ -60,7 +60,7 @@ dl = Seg_DataLoader(
         label_location =  main_dr + 'labels/leak_segs/',
         annotations = main_dr + 'labels/annotations.csv',
         neg_list = None,
-        in_memory = True,
+        in_memory = False,
         memory_loc = '/mnt/sda5/temp/',
         preloaded=False)
 
