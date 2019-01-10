@@ -45,7 +45,18 @@ class DataPoint():
             np.save(self.memory_loc + self.get_ref(), data)
 
     def set_label(self, label):
-        self.label = label
+        
+        
+        if self.in_memory:
+            self.label = label
+        
+        elif self.compress:
+            f = gzip.GzipFile(self.memory_loc + self.get_ref() + 'label.npy.gz', 'w')
+            np.save(f, label)
+            f.close()
+        
+        else:
+            np.save(self.memory_loc + self.get_ref() + 'label', label)
             
     def set_affine(self, affine):
         self.affine = affine
@@ -57,7 +68,17 @@ class DataPoint():
         self.pixdims /= [s_scale, c_scale, a_scale]
         
     def set_pred_label(self, pred_label):
-        self.pred_label = pred_label
+        
+        if self.in_memory:
+            self.pred_label = pred_label
+        
+        elif self.compress:
+            f = gzip.GzipFile(self.memory_loc + self.get_ref() + 'pred_label.npy.gz', 'w')
+            np.save(f, pred_label)
+            f.close()
+        
+        else:
+            np.save(self.memory_loc + self.get_ref() + 'pred_label', pred_label)
         
         
     def get_ref(self):
@@ -71,8 +92,23 @@ class DataPoint():
         
         if copy:
             return np.copy(self.label)
+    
+        if self.in_memory and not copy:
+            return self.label
         
-        return self.label
+        elif self.in_memory and copy:
+            return np.copy(self.label)
+            
+        elif not self.compress:
+            return np.load(self.memory_loc + self.get_ref() + 'label.npy')
+
+        else:
+            
+            f = gzip.GzipFile(self.memory_loc + self.get_ref() + 'label.npy.gz', 'r')
+            label = np.load(f)
+            f.close()
+            
+            return label
     
     def get_thickness(self):
         return self.pixdims[2]
@@ -100,8 +136,23 @@ class DataPoint():
         
         if copy:
             return np.copy(self.pred_label)
+    
+        if self.in_memory and not copy:
+            return self.pred_label
         
-        return self.pred_label
+        elif self.in_memory and copy:
+            return np.copy(self.pred_label)
+            
+        elif not self.compress:
+            return np.load(self.memory_loc + self.get_ref() + 'pred_label.npy')
+
+        else:
+            
+            f = gzip.GzipFile(self.memory_loc + self.get_ref() + 'pred_label.npy.gz', 'r')
+            label = np.load(f)
+            f.close()
+            
+            return label
     
     def get_name(self):
         return self.name

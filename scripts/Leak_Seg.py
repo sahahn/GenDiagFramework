@@ -150,7 +150,11 @@ if EVAL:
             all_dps.append(test[p])
     
     print('Predicting AAA for all scans')
-    AAA_preds = pred_AAA(names)
+    AAA_preds = []
+    for name in names:
+        a_pr = pred_AAA([name])
+        
+        AAA_preds += a_pr
     
     #Use to index
     AAA_names = [a.get_name() for a in AAA_preds]
