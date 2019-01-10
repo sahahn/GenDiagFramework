@@ -61,7 +61,7 @@ dl = Seg_DataLoader(
         annotations = main_dr + 'labels/annotations.csv',
         neg_list = None,
         in_memory = True,
-        memory_loc = config['memory_loc'],
+        memory_loc = '/mnt/sda5/temp/',
         preloaded=False)
 
 print('Loading training data+labels')
@@ -115,7 +115,7 @@ if EVAL:
                                  n_classes=1,
                                  neg_list =  main_dr + 'labels/neg_leak_list.txt',
                                  in_memory = False,
-                                 memory_loc = config['memory_loc'],
+                                 memory_loc = '/mnt/sda5/temp/',
                                  preloaded=False)
         
         dl_neg.setup_kfold_splits(folds, 43)
