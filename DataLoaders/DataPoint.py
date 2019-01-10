@@ -20,11 +20,12 @@ class DataPoint():
                  ):
         
         self.name = name
-        self.label = label
         self.in_memory = in_memory
         self.memory_loc = memory_loc
         self.slc = slc
         self.compress = compress
+        
+        self.set_label(label)
         
         self.data = None
         self.affine = None
