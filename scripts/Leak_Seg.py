@@ -5,7 +5,7 @@ from DataLoaders.Seg_DataLoader import Seg_DataLoader
 from Generators.Seg_Generator import Seg_Generator
 from Models.UNet3D import UNet3D_Extra
 from Metrics.metrics import weighted_dice_coefficient_loss
-from scripts.pred_AAA import pred_AAA
+from pred_AAA import pred_AAA
 from config import config
 import nibabel as nib
 import Metrics.eval_metrics as metrics
