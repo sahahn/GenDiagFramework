@@ -91,9 +91,6 @@ class DataPoint():
     
     def get_label(self, copy=False):
         
-        if copy:
-            return np.copy(self.label)
-    
         if self.in_memory and not copy:
             return self.label
         
@@ -135,9 +132,6 @@ class DataPoint():
         
     def get_pred_label(self, copy=False):
         
-        if copy:
-            return np.copy(self.pred_label)
-    
         if self.in_memory and not copy:
             return self.pred_label
         
@@ -154,6 +148,7 @@ class DataPoint():
             f.close()
             
             return label
+        
     
     def get_name(self):
         return self.name

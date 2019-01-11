@@ -115,7 +115,8 @@ if EVAL:
         dl_neg.setup_kfold_splits(folds, 43)
     
     names = []
-    all_dps = []
+    leak_results = []
+    vol_dict = {}
     
     for fold in range(folds):
         
@@ -140,25 +141,35 @@ if EVAL:
         
         for p in range(len(preds)):
             
-            pred = preds[p]
+            #Load info for the test
             truth = np.squeeze(test[p].get_label(copy=True))
             name = test[p].get_name()
             pixdims = test[p].get_pixdims()
-            
             label = np.sum(truth) > 1
             
             print(name, label)
             
+            #Load the prediction
+            pred = preds[p]
             pred[pred > threshold] = 1
             pred[pred < threshold] = 0
-    
             pred = np.squeeze(pred)
+            
+            if label:
+                leak_results.append(compute_metrics(pred, truth))
+                print('leak_results: ', leak_results[-1])
+            
+            print('Predicting AAA')
             AAA = pred_AAA(test[p].get_name())
             
             AAA_intersect = np.sum(pred * AAA[0])
             print(AAA_intersect)
-            AAA_intersect_volume = AAA_intersect * (pixdims[0] * pixdims[1] * pixdims[2]) * 0.001
+            
+            AAA_intersect_volume = AAA_intersect * \
+                (pixdims[0] * pixdims[1] * pixdims[2]) * 0.001 # .001 For mL
             print(AAA_intersect_volume)
+            
+            vol_dict[name] = AAA_intersect_volume
             
             
             #Optionally add the process here...
@@ -247,10 +258,11 @@ if EVAL:
             
             #    final = nib.Nifti1Image(pred, affine)
             #    final.to_filename(main_dr + 'predictions/' + name + '_endo_pred.nii.gz')
+            '''
                 
     print('Leak Means = ', np.mean(leak_results, axis=0))
     print('Leak stds = ', np.std(leak_results, axis=0))
-        '''
+        
         
         
         
