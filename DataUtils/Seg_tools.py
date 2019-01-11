@@ -80,9 +80,10 @@ def get_seen(seg, start_flag):
     
     return seen
 
-def fast_process(p):
+def fast_process(p, p_thresh):
     ''' p - Predicted 3D segmentation, with 1 or more classes.
-    
+        p_thresh - Thresholded percent to which below, automatically remove
+        
         Return a post processed version, attempting to remove outliers. This
         is notably the faster and rougher version for post proccessing segs.'''
     
@@ -93,7 +94,7 @@ def fast_process(p):
     
     for i in range(1, highest+1):
         percent = len(labels[labels == i]) / total
-        if percent < .05:
+        if percent < p_thresh:
             p[labels == i] = 0
             
     return p
@@ -106,9 +107,9 @@ def custom_bound(i, labels):
     return segmentation.find_boundaries(l, connectivity=1, mode='outer', background=0)
 
 
-def process(p, percent):
+def process(p, p_thresh):
     '''p - Predicted 3D segmentation, with 1 or more classes.
-       percent - Thresholded percent to which below, automatically remove
+       p_thresh - Thresholded percent to which below, automatically remove
        Return a post processed version, attempting to remove outliers.
     '''
     
@@ -124,7 +125,7 @@ def process(p, percent):
         num = len(labels[labels == i])
         percent = num / total
         
-        if percent < percent:
+        if percent < p_thresh:
             p[labels == i] = np.argmax(np.bincount(p[custom_bound(i, labels)].astype(np.int)))
 
     p[p == 300] = 0
@@ -142,7 +143,7 @@ def proc_prediction(data_point, pred, threshold=.5):
     for i in range(len(pred)):
         output[pred[i] == maxes] = i+1
     
-    output = process(output)
+    output = process(output, .01)
     
     for i in range(len(pred)):
         pred[i] = 0
