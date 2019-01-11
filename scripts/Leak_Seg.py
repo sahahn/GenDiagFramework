@@ -160,7 +160,8 @@ if EVAL:
                 print('leak_results: ', leak_results[-1])
             
             print('Predicting AAA')
-            AAA = pred_AAA(test[p].get_name())
+            AAA_dp = pred_AAA(test[p].get_name())
+            AAA = AAA_dp.get_pred_label()
             
             AAA_intersect = np.sum(pred * AAA[0])
             print(AAA_intersect)
