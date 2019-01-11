@@ -16,7 +16,7 @@ import keras
 import numpy as np
 
 
-def pred_AAA(names):
+def pred_AAA(name):
     
     folds = 5
     num_snaps = 5
@@ -29,7 +29,7 @@ def pred_AAA(names):
         annotations = main_dr + 'labels/annotations.csv',
         seg_key='Garbage',
         n_classes=2,
-        neg_list = names,
+        neg_list = [name],
         in_memory = False,
         memory_loc = '/mnt/sda5/temp/')
     
@@ -60,7 +60,7 @@ def pred_AAA(names):
     for i in range(len(to_eval)):
         to_eval[i] = proc_prediction(to_eval[i], preds[i])
         
-    return to_eval
+    return to_eval[0]
            
 
     

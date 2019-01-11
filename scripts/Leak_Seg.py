@@ -98,12 +98,6 @@ if TRAIN:
         
 if EVAL:
     
-    names = []
-    all_dps = []
-    
-    model = UNet3D_Extra(input_shape = (1, 128, 128, 128), n_labels=1)
-    model.compile(optimizer=keras.optimizers.adam(.001), loss=loss_func)
-    
     if add_extra:
         
         print("Loading extra evaluation data")
@@ -119,8 +113,14 @@ if EVAL:
                                  preloaded=False)
         
         dl_neg.setup_kfold_splits(folds, 43)
-     
+    
+    names = []
+    all_dps = []
+    
     for fold in range(folds):
+        
+        model = UNet3D_Extra(input_shape = (1, 128, 128, 128), n_labels=1)
+        model.compile(optimizer=keras.optimizers.adam(.001), loss=loss_func)
         
         train, test = dl.get_k_split(fold)
         
@@ -136,19 +136,42 @@ if EVAL:
         print('Predicting Leaks for fold - ', fold)
         preds = model.predict_generator(test_gen)
         
+        del model
+        
         for p in range(len(preds)):
             
             pred = preds[p]
+            truth = np.squeeze(test[p].get_label(copy=True))
+            name = test[p].get_name()
+            pixdims = test[p].get_pixdims()
+            
+            label = np.sum(truth) > 1
+            
+            print(name, label)
             
             pred[pred > threshold] = 1
             pred[pred < threshold] = 0
+    
+            pred = np.squeeze(pred)
+            AAA = pred_AAA(test[p].get_name())
+            
+            AAA_intersect = np.sum(pred * AAA[0])
+            print(AAA_intersect)
+            AAA_intersect_volume = AAA_intersect * (pixdims[0] * pixdims[1] * pixdims[2]) * 0.001
+            print(AAA_intersect_volume)
+            
             
             #Optionally add the process here...
-            test[p].set_pred_label(pred)
-            names.append(test[p].get_name())
+            #test[p].set_pred_label(pred)
             
-            all_dps.append(test[p])
+            
+            
+            
+            #names.append(test[p].get_name())
+            
+            #all_dps.append(test[p])
     
+    '''
     print('Predicting AAA for all scans')
     AAA_preds = []
     for name in names:
@@ -227,7 +250,7 @@ if EVAL:
                 
     print('Leak Means = ', np.mean(leak_results, axis=0))
     print('Leak stds = ', np.std(leak_results, axis=0))
-        
+        '''
         
         
         
