@@ -8,6 +8,7 @@ from Metrics.metrics import weighted_dice_coefficient_loss
 from pred_AAA import pred_AAA
 from config import config
 import nibabel as nib
+from DataUtils.Seg_tools import process
 import Metrics.eval_metrics as metrics
 from Callbacks.LR_decay import get_callbacks
 import numpy as np
@@ -117,6 +118,7 @@ if EVAL:
     names = []
     leak_results = []
     vol_dict = {}
+    label_dict = {}
     
     for fold in range(folds):
         
@@ -134,7 +136,7 @@ if EVAL:
         gen, test_gen = create_gens(train, test)
         model.load_weights(main_dr + 'saved_models/Leak-' + str(fold) + '.h5')
         
-        print('Predicting Leaks for fold - ', fold)
+        print('*Predicting Leaks for fold - ', fold, '*')
         preds = model.predict_generator(test_gen)
         
         del model
@@ -145,43 +147,59 @@ if EVAL:
             truth = np.squeeze(test[p].get_label(copy=True))
             name = test[p].get_name()
             pixdims = test[p].get_pixdims()
-            label = np.sum(truth) > 1
             
+            label = np.sum(truth) > 1
+            label_dict[name] = label
+            
+            print('---------')
             print(name, label)
             
             #Load the prediction
             pred = preds[p]
+            
             pred[pred > threshold] = 1
             pred[pred < threshold] = 0
+            
             pred = np.squeeze(pred)
+            pred = process(pred, .1)
             
             if label:
                 leak_results.append(compute_metrics(pred, truth))
                 print('leak_results: ', leak_results[-1])
             
-            print('Predicting AAA')
+            print('*Predicting AAA*')
             AAA_dp = pred_AAA(test[p].get_name())
             AAA = AAA_dp.get_pred_label()
             
             AAA_intersect = np.sum(pred * AAA[0])
-            print(AAA_intersect)
             
             AAA_intersect_volume = AAA_intersect * \
                 (pixdims[0] * pixdims[1] * pixdims[2]) * 0.001 # .001 For mL
-            print(AAA_intersect_volume)
+            print('AAA_intersect_volume: ', AAA_intersect_volume)
             
             vol_dict[name] = AAA_intersect_volume
             
+            print('---------')
+            print()
             
             #Optionally add the process here...
             #test[p].set_pred_label(pred)
-            
-            
-            
-            
+
             #names.append(test[p].get_name())
             
             #all_dps.append(test[p])
+            
+    for name in vol_dict:
+        if 'pre' not in name:
+            
+            pre_name = name.replace('art', 'pre')
+            pre_name = pre_name.replace('ven', 'pre')
+            
+            print(name, ': ', end='')
+            print(vol_dict[name] - vol_dict[name], label_dict[name])
+            
+        
+        
     
     '''
     print('Predicting AAA for all scans')

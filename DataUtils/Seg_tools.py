@@ -106,8 +106,9 @@ def custom_bound(i, labels):
     return segmentation.find_boundaries(l, connectivity=1, mode='outer', background=0)
 
 
-def process(p):
+def process(p, percent):
     '''p - Predicted 3D segmentation, with 1 or more classes.
+       percent - Thresholded percent to which below, automatically remove
        Return a post processed version, attempting to remove outliers.
     '''
     
@@ -123,8 +124,7 @@ def process(p):
         num = len(labels[labels == i])
         percent = num / total
         
-        #Default hard coded param for now...
-        if percent < .01:
+        if percent < percent:
             p[labels == i] = np.argmax(np.bincount(p[custom_bound(i, labels)].astype(np.int)))
 
     p[p == 300] = 0
