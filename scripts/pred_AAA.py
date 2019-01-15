@@ -30,7 +30,7 @@ def pred_AAA(name):
         seg_key='Garbage',
         n_classes=2,
         neg_list = [name],
-        in_memory = False,
+        in_memory = True,
         memory_loc = '/mnt/sda5/temp/')
     
     to_eval = dl.get_all()

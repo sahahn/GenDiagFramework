@@ -8,7 +8,7 @@ from Metrics.metrics import weighted_dice_coefficient_loss
 from pred_AAA import pred_AAA
 from config import config
 import nibabel as nib
-from DataUtils.Seg_tools import process
+from DataUtils.Seg_tools import fast_process
 import Metrics.eval_metrics as metrics
 from Callbacks.LR_decay import get_callbacks
 import numpy as np
@@ -42,12 +42,33 @@ def create_gens(train, test):
    
    return gen, test_gen
 
+def get_pre_items(names):
+
+    pre_names = [name.replace('art', 'pre') for name in names]
+    pre_names = [pre_name.replace('ven', 'pre') for pre_name in pre_names]
+
+    dl_pre = Seg_DataLoader(init_location='/media/sage/data/nifti_endoleak/',
+                            label_location=main_dr + 'labels/leak_segs/',
+                            annotations=main_dr + 'labels/annotations.csv',
+                            label_type='crop',
+                            seg_key='garbage',
+                            n_classes=1,
+                            neg_list=pre_names,
+                            in_memory=False,
+                            memory_loc='/mnt/sda5/temp/',
+                            preloaded=False)
+
+    items = dl_pre.get_all()
+
+    return items
+
+print('Running')
 
 TRAIN = False
 EVAL = True
 SAVE = True
 
-add_extra = True
+add_extra = False
 
 folds = 5
 epochs = 200
@@ -99,24 +120,13 @@ if TRAIN:
         
 if EVAL:
     
-    if add_extra:
-        
-        print("Loading extra evaluation data")
-        dl_neg = Seg_DataLoader(init_location = '/media/sage/data/nifti_endoleak/',
-                                 label_location =  main_dr + 'labels/leak_segs/',
-                                 annotations = main_dr + 'labels/annotations.csv',
-                                 label_type='crop',
-                                 seg_key='garbage',
-                                 n_classes=1,
-                                 neg_list =  main_dr + 'labels/neg_leak_list.txt',
-                                 in_memory = False,
-                                 memory_loc = '/mnt/sda5/temp/',
-                                 preloaded=False)
-        
-        dl_neg.setup_kfold_splits(folds, 43)
-    
     names = []
+
+    pre_leak_results = []
     leak_results = []
+    post_leak_results = []
+    post_pre_leak_results = []
+
     vol_dict = {}
     label_dict = {}
     
@@ -126,12 +136,14 @@ if EVAL:
         model.compile(optimizer=keras.optimizers.adam(.001), loss=loss_func)
         
         train, test = dl.get_k_split(fold)
+
+        extra = get_pre_items([t.get_name() for t in test])
+        test += extra
         
-        if add_extra:
-            train_neg, test_neg = dl_neg.get_k_split(fold)
-            
-            train = train + train_neg
-            test = test + test_neg
+        #if add_extra:
+        #    train_neg, test_neg = dl_neg.get_k_split(fold)
+        #    train = train + train_neg
+        #    test = test + test_neg
         
         gen, test_gen = create_gens(train, test)
         model.load_weights(main_dr + 'saved_models/Leak-' + str(fold) + '.h5')
@@ -147,8 +159,11 @@ if EVAL:
             truth = np.squeeze(test[p].get_label(copy=True))
             name = test[p].get_name()
             pixdims = test[p].get_pixdims()
-            
-            label = np.sum(truth) > 1
+
+            label = False
+            if np.sum(truth) > 1:
+                label = True
+
             label_dict[name] = label
             
             print('---------')
@@ -161,33 +176,39 @@ if EVAL:
             pred[pred < threshold] = 0
             
             pred = np.squeeze(pred)
-            pred = process(pred, .1)
+
+            if label:
+                pre_leak_results.append(compute_metrics(pred, truth))
+                print('pre_leak_results: ', pre_leak_results[-1])
+
+            pred = fast_process(pred, .1)
             
             if label:
                 leak_results.append(compute_metrics(pred, truth))
                 print('leak_results: ', leak_results[-1])
             
             print('*Predicting AAA*')
-            AAA_dp = pred_AAA(test[p].get_name())
+            AAA_dp = pred_AAA(name)
             AAA = AAA_dp.get_pred_label()
             
             AAA_intersect = np.sum(pred * AAA[0])
-            
+            pred_AAA = pred * AAA[0]
+
+            if label:
+                post_leak_results.append(compute_metrics(pred_AAA, truth))
+                print('post_leak_results: ', post_leak_results[-1])
+
             AAA_intersect_volume = AAA_intersect * \
                 (pixdims[0] * pixdims[1] * pixdims[2]) * 0.001 # .001 For mL
             print('AAA_intersect_volume: ', AAA_intersect_volume)
+
+            True_volume = truth * (pixdims[0] * pixdims[1] * pixdims[2]) * 0.001
+            print('True_volume: ', True_volume)
             
             vol_dict[name] = AAA_intersect_volume
             
             print('---------')
             print()
-            
-            #Optionally add the process here...
-            #test[p].set_pred_label(pred)
-
-            #names.append(test[p].get_name())
-            
-            #all_dps.append(test[p])
             
     for name in vol_dict:
         if 'pre' not in name:
@@ -279,9 +300,13 @@ if EVAL:
             #    final.to_filename(main_dr + 'predictions/' + name + '_endo_pred.nii.gz')
             '''
                 
+
+    print('pre Leak Means = ', np.mean(pre_leak_results, axis=0))
+    print('pre Leak stds = ', np.std(pre_leak_results, axis=0))
     print('Leak Means = ', np.mean(leak_results, axis=0))
     print('Leak stds = ', np.std(leak_results, axis=0))
-        
+    print('post Leak Means = ', np.mean(post_leak_results, axis=0))
+    print('post Leak stds = ', np.std(post_leak_results, axis=0))
         
         
         
