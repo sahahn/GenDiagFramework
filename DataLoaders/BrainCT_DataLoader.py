@@ -7,7 +7,9 @@ import numpy as np
 class BrainCT_DataLoader(Seg_DataLoader):
     '''Overrides Seg_DataLoader'''
     
-    def extra_process(self, data, affine, dp):
+    def extra_process(self, dp):
+        
+        data = dp.get_data()
         
         proced = []
         
@@ -26,6 +28,8 @@ class BrainCT_DataLoader(Seg_DataLoader):
                 
             proced.append(fill)
             
+        dp.set_data(np.array(proced))
+            
         label = dp.get_label().transpose(2,0,1)
         
         fill = np.zeros(self.seg_input_size[1:])
@@ -36,10 +40,4 @@ class BrainCT_DataLoader(Seg_DataLoader):
             
         dp.set_label(np.expand_dims(fill, axis=0))
         
-        return data, dp
-    
-                    
-    def initial_preprocess(self, data):
-        '''ignore'''
-        
-        return data
+        return dp

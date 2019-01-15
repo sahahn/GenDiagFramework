@@ -131,18 +131,17 @@ class Seg_DataLoader(DataLoader):
                 raw_file = nib.load(raw_file_path + '.gz')
             
             self.data_points[i].set_pixdims(raw_file.header['pixdim'][1:4])
-            data, affine = raw_file.get_data(), raw_file.affine
+            self.data_points[i].set_affine(raw_file.affine)
+            self.data_points[i].set_data(raw_file.get_data())
             
-            data, self.data_points[i] = self.extra_process(data, affine, self.data_points[i])
-            data = self.initial_preprocess(data)
-         
-            self.data_points[i].set_data(data)
+            self.data_points[i] = self.extra_process(self.data_points[i])
                 
-    def extra_process(self, data, affine, dp):
+    def extra_process(self, dp):
         '''Function designed for default Seg Data Loader, to load data and optionally
            labels from full sized files that need to be resampled in a specific way'''
         
-        thickness = dp.get_thickness()
+        data, affine, thickness = dp.get_data(), dp.get_affine(), dp.get_thickness()
+
         new_shape = self.seg_input_size[1:]  #Channels first
         ranges = self.range_dict[dp.get_name()]
         
@@ -150,11 +149,13 @@ class Seg_DataLoader(DataLoader):
                    thickness, new_shape, self.pad_info[0],
                    self.pad_info[1], affine)
         
-        dp.set_affine(new_affine)
+        data = self.initial_preprocess(data)
+        dp.set_data(data)
         
         #Update the scaling factor - unless no resampling was done, then just skip
         try:
             dp.update_dims(scale_factor[0], scale_factor[1], scale_factor[2])
+            dp.set_affine(new_affine)
         except:
             pass
         
@@ -181,7 +182,7 @@ class Seg_DataLoader(DataLoader):
         
                 dp.set_label(np.array(new_label))
                 
-        return data, dp
+        return dp
     
                     
     def initial_preprocess(self, data):
