@@ -5,7 +5,6 @@ from DataLoaders.RN_DataLoader import load_annotations
 from DataUtils.tools import determine_crop_3d, calculate_ranges, normalize_data
 
 import os
-from config import config
 import numpy as np
 import nibabel as nib
 
@@ -22,6 +21,8 @@ class Seg_DataLoader(DataLoader):
                  n_classes=1,
                  pad_info=(0,7),
                  neg_list=None,
+                 seg_input_size=(1,128,128,128),
+                 clip_range = [-100, 600],
                  in_memory=True,
                  memory_loc=None,
                  compress=False,
@@ -47,6 +48,8 @@ class Seg_DataLoader(DataLoader):
                      **important**
         neg_list - Optionally provide the file path to a text file - to load in
                    blank segmentations, or a list of names to load in.
+        seg_input_size - Final input size to the network, assuming channels first
+        clip_range - Default clip range
         
         '''
         
@@ -61,6 +64,8 @@ class Seg_DataLoader(DataLoader):
         self.seg_key = seg_key
         self.n_classes = n_classes
         self.neg_list = neg_list
+        self.seg_input_size = seg_input_size
+        self.clip_range = clip_range
         
         #If a location, load annotations from location, otherwise
         #assume annotations are a list of datapoint and load ranges.
@@ -68,8 +73,9 @@ class Seg_DataLoader(DataLoader):
             anns = load_annotations(annotations)
         else:
             anns = annotations
-            
-        self.range_dict = calculate_ranges(anns)
+        
+        if anns != None:
+            self.range_dict = calculate_ranges(anns)
             
     def load_labels(self):
         
@@ -109,14 +115,14 @@ class Seg_DataLoader(DataLoader):
             names = self.neg_list
             
         for name in names:
-            label = np.zeros((self.n_classes, *config['Seg_input_size'][1:]))
+            label = np.zeros((self.n_classes, *self.seg_input_size[1:]))
             self.data_points.append(self.create_data_point(name, label))
             
     def load_data(self):
         
         for i in range(len(self.data_points)):
             
-            name = self.data_points[i].name
+            name = self.data_points[i].get_name()
             raw_file_path = self.init_location + name + '.nii'
             
             try:
@@ -125,61 +131,64 @@ class Seg_DataLoader(DataLoader):
                 raw_file = nib.load(raw_file_path + '.gz')
             
             self.data_points[i].set_pixdims(raw_file.header['pixdim'][1:4])
+            data, affine = raw_file.get_data(), raw_file.affine
             
-            thickness = self.data_points[i].get_thickness()
-            new_shape = config['Seg_input_size'][1:]  #Channels first
-            
-            data = raw_file.get_data()
-            ranges = self.range_dict[name]
-            affine = raw_file.affine
-            
-            data, new_affine, scale_factor = determine_crop_3d(data, ranges,
-                       thickness, new_shape, self.pad_info[0],
-                       self.pad_info[1], affine)
-            
-            #Update the scaling factor - unless no resampling was done, then just skip
-            try:
-                self.data_points[i].update_dims(scale_factor[0], scale_factor[1],
-                                scale_factor[2])
-            except:
-                pass
-
-           
+            data, self.data_points[i] = self.extra_process(data, affine, self.data_points[i])
             data = self.initial_preprocess(data)
-            
+         
             self.data_points[i].set_data(data)
-            self.data_points[i].set_affine(new_affine)
-            
-            label =  self.data_points[i].get_label()
-            
-            #If label type is full, must resize labels
-            if self.label_type == 'full' and np.sum(label) != 0:
                 
-                #If one channel, must add by default new channel first
-                if self.n_classes == 1:
-                
-                    new_label = determine_crop_3d( 
-                        label, ranges, thickness, new_shape, self.pad_info[0],
-                        self.pad_info[1], affine)[0] #[0] select justs label
-               
-                    self.data_points[i].set_label(np.expand_dims(
-                                                new_label, axis=0))
+    def extra_process(self, data, affine, dp):
+        '''Function designed for default Seg Data Loader, to load data and optionally
+           labels from full sized files that need to be resampled in a specific way'''
         
-                #Otherwise if multiclass, must recrop each channel
-                else:
-                    
-                    new_label = [ determine_crop_3d(channel, ranges, thickness,
-                                new_shape, self.pad_info[0], self.pad_info[1],
-                                affine)[0] for channel in label ]
+        thickness = dp.get_thickness()
+        new_shape = self.seg_input_size[1:]  #Channels first
+        ranges = self.range_dict[dp.get_name()]
+        
+        data, new_affine, scale_factor = determine_crop_3d(data, ranges,
+                   thickness, new_shape, self.pad_info[0],
+                   self.pad_info[1], affine)
+        
+        dp.set_affine(new_affine)
+        
+        #Update the scaling factor - unless no resampling was done, then just skip
+        try:
+            dp.update_dims(scale_factor[0], scale_factor[1], scale_factor[2])
+        except:
+            pass
+        
+        label =  dp.get_label()
             
-                    self.data_points[i].set_label(np.array(new_label))
-                    
+        #If label type is full, must resize labels
+        if self.label_type == 'full' and np.sum(label) != 0:
+            
+            #If one channel, must add by default new channel first
+            if self.n_classes == 1:
+            
+                new_label = determine_crop_3d( 
+                    label, ranges, thickness, new_shape, self.pad_info[0],
+                    self.pad_info[1], affine)[0] #[0] select justs label
+           
+                dp.set_label(np.expand_dims(new_label, axis=0))
+    
+            #Otherwise if multiclass, must recrop each channel
+            else:
+            
+                new_label = [ determine_crop_3d(channel, ranges, thickness,
+                            new_shape, self.pad_info[0], self.pad_info[1],
+                            affine)[0] for channel in label ]
+        
+                dp.set_label(np.array(new_label))
+                
+        return data, dp
+    
                     
     def initial_preprocess(self, data):
         '''Given data as input, preform standard preprocessing as clipping,
            normalizing then expanding the dimensions - and return proc. copy'''
         
-        data = np.clip(data, *config['clip_range'])
+        data = np.clip(data, *self.clip_range)
         data = normalize_data(data)
         data = np.expand_dims(data, axis=0) #Channels first by default 
         
