@@ -13,6 +13,7 @@ from Metrics.metrics import weighted_dice_coefficient_loss
 import Metrics.eval_metrics as metrics
 from Callbacks.LR_decay import get_callbacks
 import numpy as np
+import Metrics.eval_metrics as metrics
 from sklearn.model_selection import train_test_split
 import keras
 
@@ -44,8 +45,8 @@ def create_gens(train, test):
 
 print('Running')
 
-TRAIN = True
-EVAL = False
+TRAIN = False
+EVAL = True
 SAVE = False
 
 add_extra = False
@@ -100,3 +101,38 @@ if TRAIN:
                         workers=8,
                         epochs=epochs,
                         callbacks = callbacks)
+        
+if EVAL:
+    
+    dcs = []
+    
+    model = UNet3D_Extra(input_shape = input_size, n_labels=1)
+    model.compile(optimizer=keras.optimizers.adam(.001), loss=loss_func)
+    
+    for fold in range(0, folds):
+        
+        train, test = dl.get_k_split(fold)
+
+        tr, val = train_test_split(train, test_size=.15, random_state=43)
+        gen, test_gen = create_gens(tr, val)
+        
+        model.load_weights(main_dr + 'saved_models/Brain-' + str(fold) + '.h5')
+        
+        preds = model.predict_generator(test_gen)
+        
+        for p in range(len(preds)):
+            pred = preds[p]
+            truth = test[p].get_label(True)
+            
+            dc = metrics.dice_coef(pred, truth)
+            dcs.append(dc)
+            
+            print(dc)
+        
+    print(np.mean(dcs, axis=0))
+    print(np.std(dcs, axis=0))
+        
+        
+    
+        
+    
