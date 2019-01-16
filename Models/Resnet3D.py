@@ -253,6 +253,7 @@ class Resnet3DBuilder(object):
                                             block._keras_shape[DIM3_AXIS]),
                                  strides=(1, 1, 1))(block_output)
         flatten1 = Flatten()(pool2)
+        
         if num_outputs > 1:
             dense = Dense(units=num_outputs,
                           kernel_initializer="he_normal",
