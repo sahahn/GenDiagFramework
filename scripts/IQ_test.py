@@ -11,6 +11,7 @@ from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
 
 
 input_dims = (256, 256, 256, 1)
+scale_labels = False
 
 def create_gens(train, test):
     
@@ -40,6 +41,7 @@ dl = IQ_DataLoader(
                  label_location = '/home/sage/Neuro/ABCD_Challenge/training_fluid_intelligenceV1.csv',
                  seg_input_size = input_dims,
                  limit=50,
+                 scale_labels=scale_labels,
                  in_memory=True,
                  memory_loc=None,
                  compress=False,
@@ -70,20 +72,22 @@ for p in range(len(preds)):
 true = [dp.get_label() for dp in test]
 pred = [dp.get_pred_label() for dp in test]
 
-print('True pre reverse: ')
+print('True: ')
 print(true)
-print('Pred pre reverse: ')
+print('Pred: ')
 print(pred)
+
+if scale_labels:
  
-dl.reverse_label_scaling()
-
-true = [dp.get_label() for dp in test]
-pred = [dp.get_pred_label() for dp in test]
-
-print('True post reverse: ')
-print(true)
-print('Pred post reverse: ')
-print(pred)
+    dl.reverse_label_scaling()
+    
+    true = [dp.get_label() for dp in test]
+    pred = [dp.get_pred_label() for dp in test]
+    
+    print('True post reverse: ')
+    print(true)
+    print('Pred post reverse: ')
+    print(pred)
 
 r2_score = r2_score(true, pred)
 print('r2 score: ', r2_score)

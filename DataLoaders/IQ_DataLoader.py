@@ -14,6 +14,7 @@ class IQ_DataLoader(DataLoader):
                  label_location,
                  seg_input_size=(256,256,256,1),
                  limit=None,
+                 scale_labels=False,
                  in_memory=True,
                  memory_loc=None,
                  compress=False,
@@ -24,6 +25,7 @@ class IQ_DataLoader(DataLoader):
                          compress, preloaded)
          
          self.seg_input_size = seg_input_size
+         self.scale_labels = scale_labels
          self.scale_info = None
          
          if limit == None:
@@ -48,10 +50,9 @@ class IQ_DataLoader(DataLoader):
                     ids.append(line[0])
                     scores.append(float(line[1].strip()))
                     
-                    
-                    
-        scores, self.scale_info = normalize_data(np.array(scores),
-                                                 return_reverse=True)
+        if self.scale_labels:
+            scores, self.scale_info = normalize_data(np.array(scores),
+                                                     return_reverse=True)
         
         for i in range(len(ids)):
             self.iq_dict[ids[i]] = scores[i]
