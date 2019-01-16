@@ -27,6 +27,7 @@ from keras.layers.convolutional import (
 )
 from keras.layers.merge import add
 from keras.layers.normalization import BatchNormalization
+from keras_contrib.layers.normalization import InstanceNormalization
 from keras.regularizers import l2
 from keras import backend as K
 
@@ -34,7 +35,10 @@ from keras import backend as K
 
 def _bn_relu(input):
     """Helper to build a BN -> relu block (by @raghakot)."""
-    norm = BatchNormalization(axis=CHANNEL_AXIS)(input)
+    
+    #norm = BatchNormalization(axis=CHANNEL_AXIS)(input)
+    norm = InstanceNormalization(axis=CHANNEL_AXIS)(input)
+    
     return Activation("relu")(norm)
 
 
