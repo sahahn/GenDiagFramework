@@ -7,7 +7,7 @@ import numpy as np
 import os
 
 
-class TwoD_DataLoader(DataLoader):
+class IQ_DataLoader(DataLoader):
     
     def __init__(self,
                  init_location,    
