@@ -123,9 +123,13 @@ if EVAL:
         for p in range(len(preds)):
             pred = preds[p]
             truth = test[p].get_label(True)
+            name = test[p].get_name()
+            
             
             dc = metrics.dice_coef(pred, truth)
             dcs.append(dc)
+            
+            print(name, dc)
         
         print(np.mean(dcs, axis=0))
         print(np.std(dcs, axis=0))
