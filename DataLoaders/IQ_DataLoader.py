@@ -97,6 +97,7 @@ class IQ_DataLoader(DataLoader):
                     new_data = data
                     
                 dp.set_data(new_data)
+                self.data_points.append(dp)
                 
             
             

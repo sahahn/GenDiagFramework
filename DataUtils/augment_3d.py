@@ -91,8 +91,36 @@ def augment_data(data, truth, affine, scale_deviation=None, flip=True):
     
     return data, truth_data
 
-def augment_just_data(data, affine, scale_deviation=None, flip=True)
-
+def augment_just_data(data, affine, scale_deviation=None, flip=True):
+    '''By default assume channel last setup, used for just data aug on data not label.'''
+    
+    #Temp set to channels first
+    data = np.rollaxis(data, -1, 0)
+    
+    n_dim = len(data.shape) - 1
+    
+    if scale_deviation:
+        scale_factor = random_scale_factor(n_dim, std=scale_deviation)
+    else:
+        scale_factor = None
+    if flip:
+        flip_axis = random_flip_dimensions(n_dim)
+    else:
+        flip_axis = None
+    
+    data_list = list()
+        
+    for data_index in range(data.shape[0]):
+        image = get_image(data[data_index], affine)
+        data_list.append(resample_to_img(distort_image(image, flip_axis=flip_axis,
+                                                       scale_factor=scale_factor), image,
+                                         interpolation="continuous").get_data())
+    data = np.asarray(data_list)
+    
+    #Switch back to channels last
+    data = np.rollaxis(data, 0, -1)
+    
+    return data
 
 def get_image(data, affine, nib_class=nib.Nifti1Image):
     return nib_class(dataobj=data, affine=affine)
@@ -162,9 +190,25 @@ def random_permutation_x_y(x_data, y_data):
     :param y_data: numpy array containing the data. Data must be of shape (n_modalities, x, y, z).
     :return: the permuted data
     """
+    
     key = random_permutation_key()
     return permute_data(x_data, key), permute_data(y_data, key)
 
+def random_permutation_x(x_data):
+    """
+    Performs random permutation on the data.
+    :param x_data: numpy array containing the data. Data must be of shape (x, y, z, n_modalities).
+    :return: the permuted data
+    """
+    
+    x_data = np.rollaxis(x_data, -1, 0)
+    
+    key = random_permutation_key()
+    x_data = permute_data(x_data, key)
+    
+    x_data = np.rollaxis(x_data, 0, -1)
+    
+    return x_data
 
 def reverse_permute_data(data, key):
     key = reverse_permutation_key(key)
