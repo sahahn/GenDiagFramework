@@ -124,8 +124,6 @@ if EVAL:
             
             dc = metrics.dice_coef(pred, truth)
             dcs.append(dc)
-            
-            print(dc)
         
     print(np.mean(dcs, axis=0))
     print(np.std(dcs, axis=0))
