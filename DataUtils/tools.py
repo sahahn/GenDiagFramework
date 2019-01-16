@@ -5,20 +5,39 @@ from skimage.transform import resize
 import scipy
 import scipy.ndimage
 
-def normalize_data(scan):
+def normalize_data(data, return_reverse=False):
 
-    scan = scan.astype('float32')
-    scan -= np.mean(scan)
-    scan /= np.max(scan)
-
-    imax = np.max(scan)
-    imin = np.min(scan)
-
-    scan -= imin
-    scan /= (imax-imin)
+    data = data.astype('float32')
     
-    return scan
+    data_mean = np.mean(data)
+    data -= data_mean
+    
+    data_max = np.max(data)
+    data /= data_max
 
+    imax = np.max(data)
+    imin = np.min(data)
+
+    data -= imin
+    data /= (imax-imin)
+    
+    if not return_reverse:
+        return data
+    
+    else:
+        return data, (data_mean, data_max, imax, imin)
+    
+def unnormalize_data(data, scale_info):
+    
+    data_mean, data_max, imax, imin = scale_info
+    
+    data *= (imax-imin)
+    data += imin
+    
+    data *= data_max
+    data += data_mean
+    
+    return data
 
 def resample(image, new_shape):
 
