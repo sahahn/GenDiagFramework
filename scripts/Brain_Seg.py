@@ -112,9 +112,7 @@ if EVAL:
     for fold in range(0, folds):
         
         train, test = dl.get_k_split(fold)
-
-        tr, val = train_test_split(train, test_size=.15, random_state=43)
-        gen, test_gen = create_gens(tr, val)
+        gen, test_gen = create_gens(train, test)
         
         model.load_weights(main_dr + 'saved_models/Brain-' + str(fold) + '.h5')
         
