@@ -66,7 +66,14 @@ class IQ_DataLoader(DataLoader):
                 label = self.iq_dict[name]
                 dp = self.create_data_point(name, label)
                 
-                raw_file = nib.load(self.init_location + name + '/baseline/structural/t1_brain.nii.gz')
+                try:
+                    raw_file = nib.load(self.init_location + name + '/baseline/structural/t1_brain.nii.gz')
+                    
+                except FileNotFoundError:
+                    print('missing: ', name)
+                    continue
+                
+                
                 dp.set_affine(raw_file.affine)
                 
                 data = raw_file.get_data() 

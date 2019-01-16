@@ -57,6 +57,7 @@ def distort_image(image, flip_axis=None, scale_factor=None):
 
 
 def augment_data(data, truth, affine, scale_deviation=None, flip=True):
+    '''By default assumes channel first setup, and used for segmentation'''
     
     n_dim = len(truth.shape) - 1
     
@@ -89,6 +90,8 @@ def augment_data(data, truth, affine, scale_deviation=None, flip=True):
     truth_data = np.array(truth_data)
     
     return data, truth_data
+
+def augment_just_data(data, affine, scale_deviation=None, flip=True)
 
 
 def get_image(data, affine, nib_class=nib.Nifti1Image):
