@@ -60,7 +60,7 @@ model.fit_generator(generator=gen,
                     validation_data=test_gen,
                     use_multiprocessing=True,
                     workers=8,
-                    epochs=1)
+                    epochs=10)
 
 preds = model.predict_generator(test_gen)
 
