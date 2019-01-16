@@ -57,7 +57,8 @@ class IQ_DataLoader(DataLoader):
         
     def load_data(self):
         
-        names = os.listdir()
+        names = os.listdir(self.init_location)
+        names = [name for name in names if 'NDAR' in name]
         
         for name in names:
             if len(self.data_points) < self.limit:
