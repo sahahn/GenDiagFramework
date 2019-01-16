@@ -46,10 +46,10 @@ dl = IQ_DataLoader(
 
 train, test = dl.get_train_test_split(.2, 43)
 
-print(len(train), print(len(test)))
+print(len(train), len(test))
 
 rn_builder = Resnet3DBuilder()
-model = rn_builder.build_resnet_50(input_shape=input_dims, num_outputs=1, reg_factor=1e-4)
+model = rn_builder.build_resnet_34(input_shape=input_dims, num_outputs=1, reg_factor=1e-4)
 model.compile(loss = 'mean_squared_error', optimizer = keras.optimizers.adam(.001))
 
 gen, test_gen = create_gens(train, test)
