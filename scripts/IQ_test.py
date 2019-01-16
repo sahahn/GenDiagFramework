@@ -50,12 +50,6 @@ train, test = dl.get_train_test_split(.2, 43)
 
 print(len(train), len(test))
 
-for t in train:
-    print(t.get_name(), t.get_label(copy=True))
-    
-for t in test:
-    print(t.get_name(), t.get_label(copy=True))
-
 rn_builder = Resnet3DBuilder()
 model = rn_builder.build_resnet_34(input_shape=input_dims, num_outputs=1, reg_factor=1e-4)
 model.compile(loss = 'mean_squared_error', optimizer = keras.optimizers.adam(.001))
@@ -70,7 +64,7 @@ model.fit_generator(generator=gen,
 
 preds = model.predict_generator(test_gen)
 
-for p in len(preds):
+for p in range(len(preds)):
     test[p].set_pred_label(preds[p])
     
 dl.reverse_label_scaling()
