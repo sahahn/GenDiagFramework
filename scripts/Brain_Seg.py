@@ -45,7 +45,7 @@ def create_gens(train, test):
 
 print('Running')
 
-TRAIN = False
+TRAIN = True
 EVAL = True
 SAVE = False
 
@@ -79,9 +79,7 @@ if TRAIN:
     for fold in range(0, folds):
         
         train, test = dl.get_k_split(fold)
-
-        tr, val = train_test_split(train, test_size=.15, random_state=43)
-        gen, test_gen = create_gens(tr, val)
+        gen, test_gen = create_gens(train, test)
     
         model = UNet3D_Extra(input_shape = input_size, n_labels=1)
         model.compile(optimizer=keras.optimizers.adam(.001), loss=loss_func)
@@ -104,14 +102,14 @@ if TRAIN:
         
 if EVAL:
     
-    
+    dcs = []
     
     model = UNet3D_Extra(input_shape = input_size, n_labels=1)
     model.compile(optimizer=keras.optimizers.adam(.001), loss=loss_func)
     
     for fold in range(0, folds):
         
-        dcs = []
+        
         
         train, test = dl.get_k_split(fold)
         gen, test_gen = create_gens(train, test)
@@ -128,11 +126,9 @@ if EVAL:
             
             dc = metrics.dice_coef(pred, truth)
             dcs.append(dc)
-            
-            print(name, dc)
         
-        print(np.mean(dcs, axis=0))
-        print(np.std(dcs, axis=0))
+    print(np.mean(dcs, axis=0))
+    print(np.std(dcs, axis=0))
         
         
     
