@@ -49,7 +49,7 @@ class IQ_DataLoader(DataLoader):
                     
                     
                     
-        scores = normalize_data(scores)
+        scores = normalize_data(np.array(scores))
         
         for i in range(len(ids)):
             self.iq_dict[ids[i]] = scores[i]
