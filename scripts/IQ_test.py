@@ -65,8 +65,12 @@ model.fit_generator(generator=gen,
 preds = model.predict_generator(test_gen)
 
 for p in range(len(preds)):
-    test[p].set_pred_label(preds[p])
+    test[p].set_pred_label(float(preds[p]))
     
+true = [dp.get_label() for dp in test]
+pred = [dp.get_pred_label() for dp in test]
+
+   
 dl.reverse_label_scaling()
 
 true = [dp.get_label() for dp in test]
