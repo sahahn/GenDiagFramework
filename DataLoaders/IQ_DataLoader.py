@@ -99,6 +99,23 @@ class IQ_DataLoader(DataLoader):
                 dp.set_data(new_data)
                 self.data_points.append(dp)
                 
+    
+    #All Unique patients, so just override get_patient, w/ get name instead
+    def get_unique_patients(self):
+        
+        patients = sorted([dp.get_name() for dp in self.data_points])
+        return np.array(patients)
+    
+    def get_data_points_by_patient(self, patients):
+        
+        relevant = []
+        
+        for dp in self.data_points:
+            if dp.get_name() in patients:
+                relevant.append(dp)
+        
+        return relevant
+                
             
             
 #/baseline/structural/t1_brain.nii.gz or t1_gm_parc.nii.gz
