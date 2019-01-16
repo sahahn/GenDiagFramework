@@ -70,13 +70,19 @@ for p in range(len(preds)):
 true = [dp.get_label() for dp in test]
 pred = [dp.get_pred_label() for dp in test]
 
-   
+print('True pre reverse: ')
+print(true)
+print('Pred pre reverse: ')
+print(pred)
+ 
 dl.reverse_label_scaling()
 
 true = [dp.get_label() for dp in test]
 pred = [dp.get_pred_label() for dp in test]
 
+print('True post reverse: ')
 print(true)
+print('Pred post reverse: ')
 print(pred)
 
 r2_score = r2_score(true, pred)
