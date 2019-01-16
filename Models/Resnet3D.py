@@ -266,7 +266,7 @@ class Resnet3DBuilder(object):
         else:
             dense = Dense(units=num_outputs,
                           kernel_initializer="he_normal",
-                          activation="sigmoid",
+                          activation=None,
                           kernel_regularizer=l2(reg_factor))(flatten1)
 
         model = Model(inputs=input, outputs=dense)
