@@ -78,7 +78,7 @@ class IQ_DataLoader(DataLoader):
                 if shp < self.seg_input_size:
                     new_data = np.zeros(self.seg_input_size)
                     
-                    dif1 = int(np.floor(np.shape(new_data)[0] - np.shape(data)[0])) + 1
+                    dif1 = int(np.floor(np.shape(new_data)[0] - np.shape(data)[0]))
                     dif2 = int(np.ceil(np.shape(new_data)[0] - np.shape(data)[0]))
                     
                     new_data[dif1:shp[0]+dif2, dif1:shp[1]+dif2, dif1:shp[2]+dif2] = data
