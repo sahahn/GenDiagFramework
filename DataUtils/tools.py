@@ -5,7 +5,7 @@ from skimage.transform import resize
 import scipy
 import scipy.ndimage
 
-def normalize_data(data, return_reverse=False):
+def standardize_data(data, return_reverse=False):
 
     data = data.astype('float32')
     
@@ -15,24 +15,24 @@ def normalize_data(data, return_reverse=False):
     data_max = np.max(data)
     data /= data_max
 
-    imax = np.max(data)
-    imin = np.min(data)
+    #imax = np.max(data)
+    #imin = np.min(data)
 
-    data -= imin
-    data /= (imax-imin)
+    #data -= imin
+    #data /= (imax-imin)
     
     if not return_reverse:
         return data
     
     else:
-        return data, (data_mean, data_max, imax, imin)
+        return data, (data_mean, data_max)
     
-def unnormalize_data(data, scale_info):
+def reverse_standardize_data(data, scale_info):
     
     data_mean, data_max, imax, imin = scale_info
     
-    data *= (imax-imin)
-    data += imin
+    #data *= (imax-imin)
+    #data += imin
     
     data *= data_max
     data += data_mean

@@ -2,7 +2,7 @@
 
 from DataLoaders.DataLoader import DataLoader
 from DataLoaders.RN_DataLoader import load_annotations
-from DataUtils.tools import determine_crop_3d, calculate_ranges, normalize_data
+from DataUtils.tools import determine_crop_3d, calculate_ranges, standardize_data
 
 import os
 import numpy as np
@@ -190,7 +190,7 @@ class Seg_DataLoader(DataLoader):
            normalizing then expanding the dimensions - and return proc. copy'''
         
         data = np.clip(data, *self.clip_range)
-        data = normalize_data(data)
+        data = standardize_data(data)
         data = np.expand_dims(data, axis=0) #Channels first by default 
         
         return data

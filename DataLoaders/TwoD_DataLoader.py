@@ -7,7 +7,7 @@ Created on Thu Dec 13 11:09:31 2018
 @author: sage
 """
 from DataLoaders.DataLoader import DataLoader
-from DataUtils.tools import normalize_data
+from DataUtils.tools import standardize_data
 from config import config
 
 import numpy as np
@@ -55,7 +55,7 @@ class TwoD_DataLoader(DataLoader):
            points, if specific image proc. needs to be done.'''
         
         image = np.clip(image, *config['clip_range'])
-        image = normalize_data(image)
+        image = standardize_data(image)
         
         #Adds an extra channel
         image = np.expand_dims(image, axis=-1)

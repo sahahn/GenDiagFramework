@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from DataLoaders.Seg_DataLoader import Seg_DataLoader
-from DataUtils.tools import normalize_data
+from DataUtils.tools import standardize_data
 import numpy as np
 
 class BrainCT_DataLoader(Seg_DataLoader):
@@ -18,7 +18,7 @@ class BrainCT_DataLoader(Seg_DataLoader):
             #Set to channels first
             x = data[ind].transpose(2,0,1)
             x = np.clip(x, *self.clip_range[ind])
-            x = normalize_data(x)
+            x = standardize_data(x)
             
             fill = np.zeros(self.seg_input_size[1:])
             dif = self.seg_input_size[1] - len(x)

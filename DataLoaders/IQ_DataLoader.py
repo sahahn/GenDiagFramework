@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from DataLoaders.DataLoader import DataLoader
-from DataUtils.tools import normalize_data, unnormalize_data, resample
+from DataUtils.tools import standardize_data, reverse_standardize_data, resample
 import nibabel as nib
 import numpy as np
 import os
@@ -51,7 +51,7 @@ class IQ_DataLoader(DataLoader):
                     scores.append(float(line[1].strip()))
                     
         if self.scale_labels:
-            scores, self.scale_info = normalize_data(np.array(scores),
+            scores, self.scale_info = standardize_data(np.array(scores),
                                                      return_reverse=True)
         
         for i in range(len(ids)):
@@ -80,7 +80,7 @@ class IQ_DataLoader(DataLoader):
                 dp.set_affine(raw_file.affine)
                 
                 data = raw_file.get_data() 
-                data = normalize_data(data)
+                data = standardize_data(data)
                 data = np.expand_dims(data, axis=-1)
                 
                 shp = np.shape(data)
@@ -108,10 +108,10 @@ class IQ_DataLoader(DataLoader):
         for dp in self.data_points:
             label, pred_label = dp.get_label(), dp.get_pred_label()
             
-            dp.set_label(unnormalize_data(label, self.scale_info))
+            dp.set_label(reverse_standardize_data(label, self.scale_info))
             
             if pred_label != None:
-                dp.set_pred_label(unnormalize_data(pred_label, self.scale_info))
+                dp.set_pred_label(reverse_standardize_data(pred_label, self.scale_info))
     
     #All Unique patients, so just override get_patient, w/ get name instead
     def get_unique_patients(self):
