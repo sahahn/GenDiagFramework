@@ -11,7 +11,10 @@ from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
 
 
 input_dims = (256, 256, 256, 1)
-scale_labels = False
+scale_labels = True
+initial_lr = .0005
+num_to_load = 600
+epochs = 100
 
 def create_gens(train, test):
     
@@ -40,10 +43,10 @@ dl = IQ_DataLoader(
                  init_location = '/media/sage/Images/training/',    
                  label_location = '/home/sage/Neuro/ABCD_Challenge/training_fluid_intelligenceV1.csv',
                  seg_input_size = input_dims,
-                 limit=50,
+                 limit=num_to_load,
                  scale_labels=scale_labels,
-                 in_memory=True,
-                 memory_loc=None,
+                 in_memory=False,
+                 memory_loc='/mnt/sda5/temp/',
                  compress=False,
                  preloaded=False
                  )
@@ -53,8 +56,8 @@ train, test = dl.get_train_test_split(.2, 43)
 print(len(train), len(test))
 
 rn_builder = Resnet3DBuilder()
-model = rn_builder.build_resnet_34(input_shape=input_dims, num_outputs=1, reg_factor=1e-4)
-model.compile(loss = 'mean_squared_error', optimizer = keras.optimizers.adam(.001))
+model = rn_builder.build_resnet_18(input_shape=input_dims, num_outputs=1, reg_factor=1e-6)
+model.compile(loss = 'mean_squared_error', optimizer = keras.optimizers.sgd(initial_lr))
 
 gen, test_gen = create_gens(train, test)
 
@@ -62,7 +65,7 @@ model.fit_generator(generator=gen,
                     validation_data=test_gen,
                     use_multiprocessing=True,
                     workers=8,
-                    epochs=10)
+                    epochs=epochs)
 
 preds = model.predict_generator(test_gen)
 

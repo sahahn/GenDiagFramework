@@ -45,7 +45,7 @@ def create_gens(train, test):
 
 print('Running')
 
-TRAIN = True
+TRAIN = False
 EVAL = True
 SAVE = False
 
@@ -76,7 +76,7 @@ print('Loading training data+labels')
 dl.setup_kfold_splits(folds, 43)
 
 if TRAIN:
-    for fold in range(0, folds):
+    for fold in range(3, folds):
         
         train, test = dl.get_k_split(fold)
         gen, test_gen = create_gens(train, test)
@@ -88,9 +88,9 @@ if TRAIN:
                                   initial_learning_rate=5e-3,
                                   learning_rate_drop=.5,
                                   learning_rate_epochs=None,
-                                  learning_rate_patience=10,
+                                  learning_rate_patience=5,
                                   verbosity=1,
-                                  early_stopping_patience=30)
+                                  early_stopping_patience=10)
             
         model.fit_generator(
                         generator=gen,
@@ -126,7 +126,7 @@ if EVAL:
             
             dc = metrics.dice_coef(pred, truth)
             dcs.append(dc)
-        
+            print(name, dc)
     print(np.mean(dcs, axis=0))
     print(np.std(dcs, axis=0))
         
