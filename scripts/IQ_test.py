@@ -6,15 +6,17 @@ import numpy as np
 from DataLoaders.IQ_DataLoader import IQ_DataLoader
 from Generators.IQ_Generator import IQ_Generator
 from Models.Resnet3D import Resnet3DBuilder
+from Callbacks.LR_decay import get_callbacks
 from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
 
 
 
 input_dims = (256, 256, 256, 1)
 scale_labels = True
-initial_lr = .0005
+initial_lr = .001
 num_to_load = 600
 epochs = 100
+main_dr = '/home/sage/GenDiagFramework/'
 
 def create_gens(train, test):
     
@@ -60,6 +62,14 @@ model = rn_builder.build_resnet_18(input_shape=input_dims, num_outputs=1, reg_fa
 model.compile(loss = 'mean_squared_error', optimizer = keras.optimizers.sgd(initial_lr))
 
 gen, test_gen = create_gens(train, test)
+
+callbacks = get_callbacks(model_file = main_dr + 'saved_models/IQ.h5',
+                          initial_learning_rate=initial_lr,
+                          learning_rate_drop=.5,
+                          learning_rate_epochs=None,
+                          learning_rate_patience=10,
+                          verbosity=1,
+                          early_stopping_patience=50)
 
 model.fit_generator(generator=gen,
                     validation_data=test_gen,
