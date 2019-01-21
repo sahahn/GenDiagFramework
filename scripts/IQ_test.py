@@ -19,12 +19,13 @@ num_to_load = None
 epochs = 100
 main_dr = '/home/sage/GenDiagFramework/'
 preloaded = True
+bs = 2
 
 def create_gens(train, test):
     
    gen = IQ_Generator(data_points = train,
                  dim=input_dims,
-                 batch_size = 2,
+                 batch_size = bs,
                  n_classes = 1,
                  shuffle = True,
                  augment = False,
@@ -35,7 +36,7 @@ def create_gens(train, test):
 
    test_gen = IQ_Generator(data_points = test,
                  dim=input_dims,
-                 batch_size = 2,
+                 batch_size = bs,
                  n_classes = 1,
                  shuffle = False,
                  augment = False)
