@@ -118,7 +118,7 @@ def augment_just_data(data, affine, scale_deviation=None, flip=True):
     data = np.asarray(data_list)
     
     #Switch back to channels last
-    data = np.rollaxis(data, 0, -1)
+    data = np.rollaxis(data, 0, len(np.shape(data)))
     
     return data
 
@@ -206,7 +206,7 @@ def random_permutation_x(x_data):
     key = random_permutation_key()
     x_data = permute_data(x_data, key)
     
-    x_data = np.rollaxis(x_data, 0, -1)
+    x_data = np.rollaxis(x_data, 0, len(np.shape(x_data)))
     
     return x_data
 

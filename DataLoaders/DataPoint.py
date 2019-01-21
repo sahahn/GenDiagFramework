@@ -50,21 +50,23 @@ class DataPoint():
         
         if self.in_memory:
             self.label = label
-        
-        elif self.compress:
-            f = gzip.GzipFile(self.memory_loc + self.get_ref() + 'label.npy.gz', 'w')
-            np.save(f, label)
-            f.close()
-        
         else:
             np.save(self.memory_loc + self.get_ref() + 'label', label)
             
     def set_affine(self, affine):
-        self.affine = affine
         
+        if self.in_memory:
+            self.affine = affine
+        else:
+            np.save(self.memory_loc + self.get_ref() + 'affine', affine)
+
     def set_pixdims(self, pixdims):
-        self.pixdims = pixdims
         
+        if self.in_memory:
+            self.pixdims = pixdims
+        else:
+            np.save(self.memory_loc + self.get_ref() + 'pixdims', pixdims)
+
     def update_dims(self, s_scale, c_scale, a_scale):
         self.pixdims /= [s_scale, c_scale, a_scale]
         
@@ -72,19 +74,17 @@ class DataPoint():
         
         if self.in_memory:
             self.pred_label = pred_label
-        
-        elif self.compress:
-            f = gzip.GzipFile(self.memory_loc + self.get_ref() + 'pred_label.npy.gz', 'w')
-            np.save(f, pred_label)
-            f.close()
-        
         else:
             np.save(self.memory_loc + self.get_ref() + 'pred_label', pred_label)
         
         
     def get_ref(self):
-        return self.name + str(self.slc)
-    
+        
+        if self.slc != None:
+            return self.name + str(self.slc)
+        else:
+            return self.name
+
     def get_patient(self):
         return self.name.split('_')[0][:-1]
     
@@ -97,19 +97,11 @@ class DataPoint():
         elif self.in_memory and copy:
             return np.copy(self.label)
             
-        elif not self.compress:
+        else:
             return np.load(self.memory_loc + self.get_ref() + 'label.npy')
 
-        else:
-            
-            f = gzip.GzipFile(self.memory_loc + self.get_ref() + 'label.npy.gz', 'r')
-            label = np.load(f)
-            f.close()
-            
-            return label
-    
     def get_thickness(self):
-        return self.pixdims[2]
+        return self.get_pixdims()[2]
     
     def get_data(self, copy=False):
             
@@ -138,18 +130,12 @@ class DataPoint():
         elif self.in_memory and copy:
             return np.copy(self.pred_label)
             
-        elif not self.compress:
-            return np.load(self.memory_loc + self.get_ref() + 'pred_label.npy')
-
         else:
-            
-            f = gzip.GzipFile(self.memory_loc + self.get_ref() + 'pred_label.npy.gz', 'r')
-            label = np.load(f)
-            f.close()
-            
-            return label
-        
-    
+            try:
+                return np.load(self.memory_loc + self.get_ref() + 'pred_label.npy')
+            except:
+                return None
+
     def get_name(self):
         return self.name
     
@@ -158,18 +144,26 @@ class DataPoint():
     
     def get_affine(self, copy=False):
         
-        if copy:
+        if self.in_memory and not copy:
+            return self.affine
+
+        elif self.in_memory and copy:
             return np.copy(self.affine)
         
-        return self.affine
+        else:
+            return np.load(self.memory_loc + self.get_ref() + 'affine.npy')
     
     def get_pixdims(self, copy=False):
         
-        if copy:
+        if self.in_memory and not copy:
+            return self.pixdims
+
+        elif self.in_memory and copy:
             return np.copy(self.pixdims)
-        
-        return self.pixdims
-        
+
+        else:
+            return np.load(self.memory_loc + self.get_ref() + 'pixdims.npy')
+
     def clear_data(self):
         
         del self.data

@@ -85,9 +85,7 @@ class DataLoader():
     def load_all(self):
         
         self.load_labels()
-        
-        if not self.preloaded:
-            self.load_data()
+        self.load_data()
     
     def get_all(self):
         '''Return just one set, for just train'''

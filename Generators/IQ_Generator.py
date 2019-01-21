@@ -23,13 +23,13 @@ class IQ_Generator(Seg_Generator):
         if self.distort:
             x = augment_3d.augment_just_data(x, affine,
                       flip=self.flip, scale_deviation=self.dist_scale)
-        
+            
         if self.permute:
             
             #Assumes channel first
-            if x.shape[-3] != x.shape[-2] or x.shape[-2] != x.shape[-1]:
-                raise ValueError("To utilize permutations, data array must be in 3D cube shape with all the same length.")
+            #if x.shape[-3] != x.shape[-2] or x.shape[-2] != x.shape[-1]:
+            #    raise ValueError("To utilize permutations, data array must be in 3D cube shape with all the same length.")
                 
             x = augment_3d.random_permutation_x(x)
-
+            
         return x, y

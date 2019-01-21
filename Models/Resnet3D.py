@@ -36,8 +36,8 @@ from keras import backend as K
 def _bn_relu(input):
     """Helper to build a BN -> relu block (by @raghakot)."""
     
-    #norm = BatchNormalization(axis=CHANNEL_AXIS)(input)
-    norm = InstanceNormalization(axis=CHANNEL_AXIS)(input)
+    norm = BatchNormalization(axis=CHANNEL_AXIS)(input)
+    #norm = InstanceNormalization(axis=CHANNEL_AXIS)(input)
     
     return Activation("relu")(norm)
 
@@ -266,7 +266,7 @@ class Resnet3DBuilder(object):
         else:
             dense = Dense(units=num_outputs,
                           kernel_initializer="he_normal",
-                          activation=None,
+                          activation="linear",
                           kernel_regularizer=l2(reg_factor))(flatten1)
 
         model = Model(inputs=input, outputs=dense)

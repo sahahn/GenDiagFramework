@@ -29,7 +29,7 @@ def standardize_data(data, return_reverse=False):
     
 def reverse_standardize_data(data, scale_info):
     
-    data_mean, data_max, imax, imin = scale_info
+    data_mean, data_max = scale_info
     
     #data *= (imax-imin)
     #data += imin

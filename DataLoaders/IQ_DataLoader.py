@@ -69,37 +69,39 @@ class IQ_DataLoader(DataLoader):
                 label = self.iq_dict[name]
                 dp = self.create_data_point(name, label)
                 
-                try:
-                    raw_file = nib.load(self.init_location + name + '/baseline/structural/t1_brain.nii.gz')
+                if self.preloaded == False:
+                    try:
+                        raw_file = nib.load(self.init_location + name + '/baseline/structural/t1_brain.nii.gz')
                     
-                except FileNotFoundError:
-                    print('missing: ', name)
-                    continue
+                    except FileNotFoundError:
+                        print('missing: ', name)
+                        continue
                 
                 
-                dp.set_affine(raw_file.affine)
+                    dp.set_affine(raw_file.affine)
                 
-                data = raw_file.get_data() 
-                data = standardize_data(data)
-                data = np.expand_dims(data, axis=-1)
+                    data = raw_file.get_data() 
+                    data = standardize_data(data)
+                    data = np.expand_dims(data, axis=-1)
                 
-                shp = np.shape(data)
+                    shp = np.shape(data)
                 
-                if shp < self.seg_input_size:
-                    new_data = np.zeros(self.seg_input_size)
+                    if shp < self.seg_input_size:
+                        new_data = np.zeros(self.seg_input_size)
                     
-                    dif1 = int(np.floor(np.shape(new_data)[0] - np.shape(data)[0]))
-                    dif2 = int(np.ceil(np.shape(new_data)[0] - np.shape(data)[0]))
+                        dif1 = int(np.floor(np.shape(new_data)[0] - np.shape(data)[0]))
+                        dif2 = int(np.ceil(np.shape(new_data)[0] - np.shape(data)[0]))
                     
-                    new_data[dif1:shp[0]+dif2, dif1:shp[1]+dif2, dif1:shp[2]+dif2] = data
+                        new_data[dif1:shp[0]+dif2, dif1:shp[1]+dif2, dif1:shp[2]+dif2] = data
                     
-                elif shp != self.seg_input_size:
-                    new_data = resample(data, self.seg_input_size)
+                    elif shp != self.seg_input_size:
+                        new_data = resample(data, self.seg_input_size)
                     
-                else:
-                    new_data = data
+                    else:
+                        new_data = data
                     
-                dp.set_data(new_data)
+                    dp.set_data(new_data)
+                
                 self.data_points.append(dp)
     
     
