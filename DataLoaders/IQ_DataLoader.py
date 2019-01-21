@@ -3,6 +3,7 @@
 from DataLoaders.DataLoader import DataLoader
 from DataUtils.tools import standardize_data, reverse_standardize_data, resample
 import nibabel as nib
+import nilearn
 import numpy as np
 import os
 
@@ -71,13 +72,16 @@ class IQ_DataLoader(DataLoader):
                 
                 if self.preloaded == False:
                     try:
-                        raw_file = nib.load(self.init_location + name + '/baseline/structural/t1_brain.nii.gz')
+                        x = nilearn.image.load_img(self.init_location + name + '/baseline/structural/t1_brain.nii.gz')
+                        print(np.shape(nilearn.image.crop_img(x)))
+                        
+                        #raw_file = nib.load(self.init_location + name + '/baseline/structural/t1_brain.nii.gz')
                     
                     except FileNotFoundError:
                         print('missing: ', name)
                         continue
                 
-                
+                    '''
                     dp.set_affine(raw_file.affine)
                 
                     data = raw_file.get_data() 
@@ -103,6 +107,8 @@ class IQ_DataLoader(DataLoader):
                     dp.set_data(new_data)
                 
                 self.data_points.append(dp)
+                
+                '''
     
     
     def reverse_label_scaling(self):
