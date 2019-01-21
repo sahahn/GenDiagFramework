@@ -235,4 +235,8 @@ def reverse_permutation_key(key):
     rotation = tuple([-rotate for rotate in key[0]])
     return rotation, key[1], key[2], key[3], key[4]
 
+def add_gaussian_noise(image, var=.1):
+
+    gauss = np.random.normal(0,var**0.5,np.shape(image))
+    return image + gauss
 

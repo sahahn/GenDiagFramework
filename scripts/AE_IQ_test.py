@@ -87,7 +87,7 @@ preds = model.predict_generator(test_gen)
 
 ex = preds[0]
 affine = ex.get_affine()
-final = nib.Nifti1Image(ex, affine)
+final = nib.Nifti1Image(ex, np.eye(4))
 final.to_filename(main_dr + 'predictions/test.nii.gz')
 
 
