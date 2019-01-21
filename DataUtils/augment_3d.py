@@ -234,3 +234,5 @@ def reverse_permute_data(data, key):
 def reverse_permutation_key(key):
     rotation = tuple([-rotate for rotate in key[0]])
     return rotation, key[1], key[2], key[3], key[4]
+
+

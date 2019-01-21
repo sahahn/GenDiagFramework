@@ -57,5 +57,3 @@ def brain_enc_model(input_shape=(160,192,160,1)):
     
     enc.summary()
     return enc
-
-brain_enc_model()

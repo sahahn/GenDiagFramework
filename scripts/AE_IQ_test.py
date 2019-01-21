@@ -6,6 +6,7 @@ from DataLoaders.IQ_DataLoader import IQ_DataLoader
 from Generators.AE_IQ_Generator import AE_IQ_Generator
 from Models.Autoencoders import encoder_model_200, brain_enc_model
 from Callbacks.LR_decay import get_callbacks
+import nibabel as nib
 
 
 main_dr = '/home/sage/GenDiagFramework/'
@@ -13,7 +14,7 @@ input_dims = (160, 192, 160, 1)
 load = False
 initial_lr = .00001
 num_to_load = 500
-epochs = 100
+epochs = 2
 preloaded = True
 bs = 1
 model_path = main_dr + 'saved_models/AE_IQ.h5'
@@ -81,5 +82,12 @@ model.fit_generator(generator=gen,
                     workers=8,
                     epochs=epochs,
                     callbacks=callbacks)
+
+preds = model.predict_generator(test_gen)
+
+ex = preds[0]
+affine = ex.get_affine()
+final = nib.Nifti1Image(ex, affine)
+final.to_filename(main_dr + 'predictions/test.nii.gz')
 
 
