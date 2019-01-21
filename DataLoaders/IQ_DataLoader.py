@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from DataLoaders.DataLoader import DataLoader
-from DataUtils.tools import standardize_data, reverse_standardize_data, resample
+from DataUtils.tools import standardize_data, normalize_data, reverse_standardize_data, resample
 import nibabel as nib
 import nilearn
 import numpy as np
@@ -72,7 +72,9 @@ class IQ_DataLoader(DataLoader):
                 
                 if self.preloaded == False:
                     try:
-                        raw_file = nib.load(self.init_location + name + '/baseline/structural/t1_brain.nii.gz')
+                        #raw_file = nib.load(self.init_location + name + '/baseline/structural/t1_brain.nii.gz')
+                        raw_file = nilearn.image.load_img(self.init_location + name + '/baseline/structural/t1_brain.nii.gz')
+                        raw_file = nilearn.image.crop_img(raw_file)
                     
                     except FileNotFoundError:
                         print('missing: ', name)
@@ -82,17 +84,22 @@ class IQ_DataLoader(DataLoader):
                 
                     data = raw_file.get_data() 
                     data = standardize_data(data)
+                    data = normalize_data(data)
                     data = np.expand_dims(data, axis=-1)
                 
                     shp = np.shape(data)
                 
-                    if shp < self.seg_input_size:
+                    if shp[0] < self.seg_input_size[0] and shp[1] < self.seg_input_size[1] and shp[2] < self.seg_input_size[2]:
                         new_data = np.zeros(self.seg_input_size)
                     
-                        dif1 = int(np.floor(np.shape(new_data)[0] - np.shape(data)[0]))
-                        dif2 = int(np.ceil(np.shape(new_data)[0] - np.shape(data)[0]))
-                    
-                        new_data[dif1:shp[0]+dif2, dif1:shp[1]+dif2, dif1:shp[2]+dif2] = data
+                        d1 = int(np.floor(np.shape(new_data)[0] - np.shape(data)[0]))
+                        d2 = int(np.ceil(np.shape(new_data)[0] - np.shape(data)[0]))
+                        d3 = int(np.floor(np.shape(new_data)[1] - np.shape(data)[1]))
+                        d4 = int(np.ceil(np.shape(new_data)[1] - np.shape(data)[1]))
+                        d5 = int(np.floor(np.shape(new_data)[2] - np.shape(data)[2]))
+                        d6 = int(np.ceil(np.shape(new_data)[2] - np.shape(data)[2]))
+
+                        new_data[d1:shp[0]+d2, d3:shp[1]+d4, d5:shp[2]+d6] = data
                     
                     elif shp != self.seg_input_size:
                         new_data = resample(data, self.seg_input_size)

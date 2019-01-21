@@ -39,6 +39,16 @@ def reverse_standardize_data(data, scale_info):
     
     return data
 
+def normalize_data(data):
+    
+    imax = np.max(data)
+    imin = np.min(data)
+
+    data -= imin
+    data /= (imax-imin)
+    
+    return data
+
 def resample(image, new_shape):
 
     
