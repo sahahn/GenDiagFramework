@@ -25,11 +25,9 @@ class IQ_Generator(Seg_Generator):
                       flip=self.flip, scale_deviation=self.dist_scale)
             
         if self.permute:
-            
-            #Assumes channel first
-            #if x.shape[-3] != x.shape[-2] or x.shape[-2] != x.shape[-1]:
-            #    raise ValueError("To utilize permutations, data array must be in 3D cube shape with all the same length.")
-                
             x = augment_3d.random_permutation_x(x)
+            
+        if self.gauss_noise != 0:
+            x = augment_3d.add_gaussian_noise(x, self.guass_noise)
             
         return x, y

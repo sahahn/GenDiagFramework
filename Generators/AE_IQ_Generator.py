@@ -40,4 +40,7 @@ class AE_IQ_Generator(Seg_Generator):
         if self.permute:
             x = augment_3d.random_permutation_x(x)
             
+        if self.gauss_noise != 0:
+            x = augment_3d.add_gaussian_noise(x, self.guass_noise)
+            
         return x

@@ -18,7 +18,8 @@ class Seg_Generator(Generator):
                  distort = False,
                  dist_scale = .1,
                  flip = False,
-                 permute = False):
+                 permute = False,
+                 gauss_noise = 0):
         
         super().__init__(data_points, dim, batch_size, n_classes,
              shuffle, augment, label_size)
@@ -27,6 +28,7 @@ class Seg_Generator(Generator):
         self.dist_scale = dist_scale
         self.flip = flip
         self.permute = permute
+        self.guass_noise = gauss_noise
         
         #If augment, but no specific augment provided - apply very small distort
         if self.augment & (self.distort or self.flip or self.permute):
@@ -70,6 +72,9 @@ class Seg_Generator(Generator):
                 raise ValueError("To utilize permutations, data array must be in 3D cube shape with all the same length.")
                 
             x, y = augment_3d.random_permutation_x_y(x, y)
+            
+        if self.gauss_noise != 0:
+            x = augment_3d.add_gaussian_noise(x, self.guass_noise)
 
         return x, y
         
