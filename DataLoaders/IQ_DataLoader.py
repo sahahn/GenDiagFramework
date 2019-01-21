@@ -64,6 +64,8 @@ class IQ_DataLoader(DataLoader):
         names = os.listdir(self.init_location)
         names = [name for name in names if 'NDAR' in name]
         
+        shapes = []
+        
         for name in names:
             if len(self.data_points) < self.limit:
             
@@ -73,7 +75,10 @@ class IQ_DataLoader(DataLoader):
                 if self.preloaded == False:
                     try:
                         x = nilearn.image.load_img(self.init_location + name + '/baseline/structural/t1_brain.nii.gz')
-                        print(np.shape(nilearn.image.crop_img(x)))
+                        shp = np.shape(nilearn.image.crop_img(x))
+                        shapes.append(shp)
+                        
+                        print(shp)
                         
                         #raw_file = nib.load(self.init_location + name + '/baseline/structural/t1_brain.nii.gz')
                     
@@ -109,6 +114,8 @@ class IQ_DataLoader(DataLoader):
                 self.data_points.append(dp)
                 
                 '''
+                
+                print(np.max(shapes, axis=0))
     
     
     def reverse_label_scaling(self):
