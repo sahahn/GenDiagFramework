@@ -12,7 +12,7 @@ from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
 
 
 load = False
-input_dims = (240, 240, 240, 1)
+input_dims = (160, 192, 160, 1)
 scale_labels = False
 initial_lr = .00001
 num_to_load = None
