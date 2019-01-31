@@ -16,38 +16,39 @@ import nibabel as nib
 class TwoD_DataLoader(DataLoader):
 
     def load_data(self):
+        if self.preloaded == False:
         
-        indx_ref_list = [dp.get_ref() for dp in self.data_points]
+            indx_ref_list = [dp.get_ref() for dp in self.data_points]
         
-        for name in self.file_names:
+            for name in self.file_names:
             
-            raw_file_path = self.init_location + name + '.nii'
+                raw_file_path = self.init_location + name + '.nii'
             
-            try:
-                raw_file = nib.load(raw_file_path)
-            except:
-                raw_file = nib.load(raw_file_path + '.gz')
-            
-            data = raw_file.get_data()
-            
-            #Sag. to axial conversion by default~
-            #TODO make this a changable param
-            data = data.transpose(2,1,0)
-            
-            for slc in range(len(data)):
-                
-                #Find placement within data_points
                 try:
-                    indx = indx_ref_list.index(name+str(slc))
-                    
-                    image = data[slc]
-                    image = self.initial_preprocess(image, indx)
-                    
-                    self.data_points[indx].set_data(image)
+                    raw_file = nib.load(raw_file_path)
+                except:
+                    raw_file = nib.load(raw_file_path + '.gz')
+            
+                data = raw_file.get_data()
+            
+                #Sag. to axial conversion by default~
+                #TODO make this a changable param
+                data = data.transpose(2,1,0)
+            
+                for slc in range(len(data)):
                 
-                #Better to ask for forgiveness rather than permisission
-                except ValueError:
-                    pass
+                    #Find placement within data_points
+                    try:
+                        indx = indx_ref_list.index(name+str(slc))
+                    
+                        image = data[slc]
+                        image = self.initial_preprocess(image, indx)
+                    
+                        self.data_points[indx].set_data(image)
+                
+                    #Better to ask for forgiveness rather than permisission
+                    except ValueError:
+                        pass
                     
             
     def initial_preprocess(self, image, indx):

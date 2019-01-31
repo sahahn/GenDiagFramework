@@ -88,18 +88,13 @@ class IQ_DataLoader(DataLoader):
                     data = np.expand_dims(data, axis=-1)
                 
                     shp = np.shape(data)
-                
-                    if shp[0] < self.seg_input_size[0] and shp[1] < self.seg_input_size[1] and shp[2] < self.seg_input_size[2]:
-                        new_data = np.zeros(self.seg_input_size)
                     
-                        d1 = int(np.floor(np.shape(new_data)[0] - np.shape(data)[0]))
-                        d2 = int(np.ceil(np.shape(new_data)[0] - np.shape(data)[0]))
-                        d3 = int(np.floor(np.shape(new_data)[1] - np.shape(data)[1]))
-                        d4 = int(np.ceil(np.shape(new_data)[1] - np.shape(data)[1]))
-                        d5 = int(np.floor(np.shape(new_data)[2] - np.shape(data)[2]))
-                        d6 = int(np.ceil(np.shape(new_data)[2] - np.shape(data)[2]))
-
-                        new_data[d1:shp[0]+d2, d3:shp[1]+d4, d5:shp[2]+d6] = data
+                    if (shp < np.array(self.seg_input_size)).all():
+                        new_data = np.zeros(self.seg_input_size)
+            
+                        d1 = np.floor((np.shape(new_data) - np.shape(data))/2)
+                        d2 = np.ceil((np.shape(new_data) - np.shape(data))/2)
+                        new_data[d1[0]:shp[0]+d2[0], d1[1]:shp[1]+d2[1], d1[2]:shp[2]+d2[2]] = data
                     
                     elif shp != self.seg_input_size:
                         new_data = resample(data, self.seg_input_size)
@@ -110,8 +105,8 @@ class IQ_DataLoader(DataLoader):
                     dp.set_data(new_data)
                 
                 self.data_points.append(dp)
+                
 
-    
     
     def reverse_label_scaling(self):
         

@@ -28,6 +28,6 @@ class IQ_Generator(Seg_Generator):
             x = augment_3d.random_permutation_x(x)
             
         if self.gauss_noise != 0:
-            x = augment_3d.add_gaussian_noise(x, self.guass_noise)
+            x = augment_3d.add_gaussian_noise(x, self.gauss_noise)
             
         return x, y

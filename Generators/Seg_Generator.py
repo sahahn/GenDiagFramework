@@ -28,7 +28,7 @@ class Seg_Generator(Generator):
         self.dist_scale = dist_scale
         self.flip = flip
         self.permute = permute
-        self.guass_noise = gauss_noise
+        self.gauss_noise = gauss_noise
         
         #If augment, but no specific augment provided - apply very small distort
         if self.augment & (self.distort or self.flip or self.permute):

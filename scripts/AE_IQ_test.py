@@ -4,7 +4,7 @@ import keras
 import numpy as np
 from DataLoaders.IQ_DataLoader import IQ_DataLoader
 from Generators.AE_IQ_Generator import AE_IQ_Generator
-from Models.Autoencoders import encoder_model_200, brain_enc_model
+from Models.Autoencoders import encoder_model_200, brain_enc_model, CNN_3D_AE
 from Callbacks.LR_decay import get_callbacks
 import nibabel as nib
 
@@ -12,11 +12,11 @@ import nibabel as nib
 main_dr = '/home/sage/GenDiagFramework/'
 input_dims = (160, 192, 160, 1)
 load = False
-initial_lr = .00001
-num_to_load = 500
-epochs = 2
+initial_lr = .0001
+num_to_load = None
+epochs = 100
 preloaded = True
-bs = 1
+bs = 6
 model_path = main_dr + 'saved_models/AE_IQ.h5'
 
 
@@ -58,8 +58,8 @@ train, test = dl.get_train_test_split(.2, 43)
 
 print(len(train), len(test))
 
-model = encoder_model_200(input_dims)
-model.compile(loss = 'mean_squared_error', optimizer = keras.optimizers.adam(initial_lr))
+model = CNN_3D_AE(input_dims, 200)
+model.compile(loss = 'binary_crossentropy', optimizer = keras.optimizers.adam(initial_lr))
 
 if load:
     model.load_weights(model_path)
@@ -85,9 +85,10 @@ model.fit_generator(generator=gen,
 
 preds = model.predict_generator(test_gen)
 
-ex = preds[0]
-affine = ex.get_affine()
-final = nib.Nifti1Image(ex, np.eye(4))
-final.to_filename(main_dr + 'predictions/test.nii.gz')
+
+for i in range(5):
+    ex = preds[i]
+    final = nib.Nifti1Image(ex, np.eye(4))
+    final.to_filename(main_dr + 'predictions/test' + str(i) + '.nii.gz')
 
 
