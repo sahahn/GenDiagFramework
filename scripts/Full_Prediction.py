@@ -126,6 +126,15 @@ for i in range(len(Seg_dps)):
     pred_max_ap = calculate_max_axial_ap(both_pred, pixdims)
     print(name, pred_max_ap)
     
+    with open('pred_aps', 'a') as f:
+        
+        f.write(name)
+        f.write(' ')
+        f.write(str(pred_max_ap[0]))
+        f.write('-')
+        f.write(str(pred_max_ap[1]))
+        f.write('\n')
+    
     if SAVE:
                 
         pred = Seg_dps[i].get_pred_label(copy=True)
