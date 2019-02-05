@@ -22,7 +22,9 @@ def get_name_slc(chunk):
 
 class RN_DataLoader(TwoD_DataLoader):
     
-    def load_labels(self, include_none=True):
+    def load_labels(self, include_none=False):
+        
+        print('include none', include_none)
         
         self.file_names = set()
         self.data_points = []
