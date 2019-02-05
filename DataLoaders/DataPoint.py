@@ -76,7 +76,10 @@ class DataPoint():
             self.pred_label = pred_label
         else:
             np.save(self.memory_loc + self.get_ref() + 'pred_label', pred_label)
-        
+            
+    def set_pred_as_true(self):
+
+        self.set_label(self.get_pred_label())
         
     def get_ref(self):
         

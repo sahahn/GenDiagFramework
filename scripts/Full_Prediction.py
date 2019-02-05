@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 from DataLoaders.RN_DataLoader import RN_DataLoader
 from Generators.RN_Generator import RN_Generator
 from Models.RetinaNet import load_RN_model
@@ -12,8 +11,6 @@ from Metrics.metrics import par_weighted_dice_coefficient_loss
 
 from DataLoaders.Seg_DataLoader import Seg_DataLoader
 from Generators.Seg_Generator import Seg_Generator
-from Models.UNet3D import UNet3D_Extra
-
 from DataUtils.Seg_tools import proc_prediction
 
 
@@ -52,11 +49,15 @@ model = load_RN_model(main_dr +'saved_models/RN.h5')
 boxes, scores = get_predictions(model, gen, RN_thresh)
 del model
 
+from Models.UNet3D import UNet3D_Extra
+
 for i in range(len(boxes)):
     RN_dps[i].set_pred_label(boxes[i])
     
 RN_dps = post_process_boxes(RN_dps)
 
+for dp in RN_dps:
+    dp.set_pred_as_true()
 
 Seg_dl = Seg_DataLoader(
         init_location = data_loc,
