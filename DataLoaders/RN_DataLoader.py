@@ -7,7 +7,7 @@ Created on Thu Dec 13 11:09:31 2018
 """
 from DataLoaders.TwoD_DataLoader import TwoD_DataLoader
 from config import config
-
+import nibabel as nib
 import numpy as np
 import csv
 
@@ -22,9 +22,9 @@ def get_name_slc(chunk):
 
 class RN_DataLoader(TwoD_DataLoader):
     
-    def load_labels(self, include_none=False):
+    def load_labels(self, include_none=True):
         
-        print('include none', include_none)
+        print('include none: ', include_none)
         
         self.file_names = set()
         self.data_points = []
@@ -53,6 +53,32 @@ class RN_DataLoader(TwoD_DataLoader):
                 self.data_points.append(self.create_data_point(name, label, slc=slc))
                 
                 
+    def load_new(self):
+        
+        for name in self.label_location:
+            
+            raw_file_path = self.init_location + name + '.nii'
+            
+            try:
+                raw_file = nib.load(raw_file_path)
+            except:
+                raw_file = nib.load(raw_file_path + '.gz')
+        
+            data = raw_file.get_data()
+            data = data.transpose(2,1,0)
+            
+            for slc in range(len(data)):
+                
+                label = np.empty((5))
+                dp = self.create_data_point(name, label, slc=slc)
+                
+                image = data[slc]
+                image = self.initial_preprocess(image, 0)
+                
+                dp.set_data(image)
+                self.data_points.append(dp)
+            
+
 def load_annotations(annotations_loc):
         '''Create an instance of the Retina Net DataLoader in order to load
            the data point w/ just label, name and slice information, and return

@@ -54,6 +54,15 @@ class DataLoader():
     def load_data(self):
         pass
     
+    def load_new(self):
+        pass
+    
+    def load_unseen(self):
+        self.load_new()
+        
+        return self.data_points
+        
+    
     def create_data_point(self, name, label, slc=None):
         
         dp = DataPoint(
