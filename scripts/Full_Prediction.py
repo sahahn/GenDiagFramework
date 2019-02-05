@@ -14,6 +14,9 @@ from Generators.Seg_Generator import Seg_Generator
 from DataUtils.Seg_tools import proc_prediction
 from DataUtils.max_ap import calculate_max_axial_ap
 
+import nibabel as nib
+import os, random
+
 
 main_dr = '/home/sage/GenDiagFramework/'
 data_loc = '/mnt/sdb2/data/nifti_endoleak/'
@@ -26,8 +29,13 @@ RN_thresh = .75
 folds = 5
 num_snaps = 5
 
-names = ['9a_art']
+num_to_get = 50
+files = os.listdir(data_loc)
+files = [file.replace('.nii', '').replace('.gz', '') for file in files]
 
+names = random.choice(files, num_to_get)
+
+SAVE = True
 
 RN_dl = RN_DataLoader(
         init_location = data_loc,
@@ -117,6 +125,21 @@ for i in range(len(Seg_dps)):
     
     pred_max_ap = calculate_max_axial_ap(both_pred, pixdims)
     print(name, pred_max_ap)
+    
+    if SAVE:
+                
+        pred = Seg_dps[i].get_pred_label(copy=True)
+        affine = Seg_dps[i].get_affine()
+
+        output = np.zeros(np.shape(pred[0]))
+        
+        for i in range(len(pred)):
+            output[pred[i] == 1] = i+1
+    
+        final = nib.Nifti1Image(output, affine)
+        final.to_filename(main_dr + 'predictions/' + name + '_pred.nii.gz')
+        
+        print('saved ', name)
 
 
                 
