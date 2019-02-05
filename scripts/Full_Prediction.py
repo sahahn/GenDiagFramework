@@ -33,7 +33,7 @@ num_to_get = 50
 files = os.listdir(data_loc)
 files = [file.replace('.nii', '').replace('.gz', '') for file in files]
 
-names = random.choice(files, num_to_get)
+names = random.choices(files, k = num_to_get)
 
 SAVE = True
 
