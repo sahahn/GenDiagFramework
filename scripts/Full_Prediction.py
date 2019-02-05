@@ -56,13 +56,24 @@ for i in range(len(boxes)):
     
 RN_dps = post_process_boxes(RN_dps)
 
+RN_pred_dps = []
+
 for dp in RN_dps:
-    dp.set_pred_as_true()
+    
+    try:
+        label = dp.get_pred_label()[0]
+        dp.set_label(label)
+        
+        RN_pred_dps.append(dp)
+    except:
+        pass
+
+del RN_dps
 
 Seg_dl = Seg_DataLoader(
         init_location = data_loc,
         label_location =  main_dr + 'labels/leak_segs/',
-        annotations = RN_dps,
+        annotations = RN_pred_dps,
         seg_key = 'Garbage',
         n_classes = 2,
         neg_list = names,
