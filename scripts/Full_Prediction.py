@@ -12,6 +12,7 @@ from Metrics.metrics import par_weighted_dice_coefficient_loss
 from DataLoaders.Seg_DataLoader import Seg_DataLoader
 from Generators.Seg_Generator import Seg_Generator
 from DataUtils.Seg_tools import proc_prediction
+from DataUtils.max_ap import calculate_max_axial_ap
 
 
 main_dr = '/home/sage/GenDiagFramework/'
@@ -47,8 +48,8 @@ gen = RN_Generator(data_points = RN_dps,
 model = load_RN_model(main_dr +'saved_models/RN.h5')
 
 boxes, scores = get_predictions(model, gen, RN_thresh)
-del model
 
+del model
 from Models.UNet3D import UNet3D_Extra
 
 for i in range(len(boxes)):
@@ -106,6 +107,19 @@ preds = np.mean(preds, axis=0)
 
 for i in range(len(Seg_dps)):
     Seg_dps[i] = proc_prediction(Seg_dps[i], preds[i])
+    
+    pred = Seg_dps[i].get_pred_label()
+    pixdims = Seg_dps[i].get_pixdims()
+    name = Seg_dps[i].get_name()
+    
+    both_pred = np.zeros(np.shape(pred[0]), dtype=int)
+    both_pred[pred[0]+pred[1] > 0] = 1
+    
+    pred_max_ap = calculate_max_axial_ap(both_pred, pixdims)
+    print(name, pred_max_ap)
+
+
+                
 
     
     

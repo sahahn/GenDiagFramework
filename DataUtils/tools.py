@@ -139,8 +139,8 @@ def calculate_ranges(data_points):
     
     for dp in data_points:
         
-        name = dp.name
-        slc = dp.slc
+        name = dp.get_name()
+        slc = dp.get_slc()
         label = dp.get_label()
         
         if name in range_dict:
