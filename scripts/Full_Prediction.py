@@ -61,7 +61,7 @@ RN_pred_dps = []
 for dp in RN_dps:
     
     try:
-        label = dp.get_pred_label()[0]
+        label = dp.get_pred_label()[0] + [1]
         dp.set_label(label)
         
         RN_pred_dps.append(dp)
