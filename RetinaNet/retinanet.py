@@ -360,27 +360,36 @@ def get_predictions(training_model, test_gen, score_threshold):
     max_detections = 1
     
     all_boxes, all_scores, all_labels = pred_model.predict_generator(generator=test_gen)
-    box_preds, score_preds = [], []
+    flag = False
     
-    for i in range(len(all_boxes)):
-        boxes = all_boxes[i]
-        scores = all_scores[i]
-        #labels = all_labels[i]
+    while flag == False:
+
+        box_preds, score_preds = [], []
+
+        for i in range(len(all_boxes)):
+            
+            boxes = all_boxes[i]
+            scores = all_scores[i]
         
-        indices = np.where(scores > score_threshold)[0]
-        scores = scores[indices]
-        
-        scores_sort = np.argsort(-scores)[:max_detections]
+            indices = np.where(scores > score_threshold)[0]
+            
+            if len(indices) > 0:
+                flag = True
+            
+            scores = scores[indices]
+            scores_sort = np.argsort(-scores)[:max_detections]
     
-        image_boxes = boxes[indices[scores_sort], :]
-        image_scores = scores[scores_sort]
+            image_boxes = boxes[indices[scores_sort], :]
+            image_scores = scores[scores_sort]
         
-        try:
-            box_preds.append(image_boxes)
-            score_preds.append(image_scores)
-        except IndexError:
-            box_preds.append(None)
-            score_preds.append(None)
+            try:
+                box_preds.append(image_boxes)
+                score_preds.append(image_scores)
+            except IndexError:
+                box_preds.append(None)
+                score_preds.append(None)
         
+        score_threshold -= .01
+ 
     return box_preds, score_preds
 

@@ -142,13 +142,12 @@ def calculate_ranges(data_points):
         name = dp.get_name()
         slc = dp.get_slc()
         label = dp.get_label()
-        
+
         if name in range_dict:
             range_dict[name] = update(slc, label[:-1], range_dict[name])
         else:
             range_dict[name] = [int(slc), int(slc), int(label[0]),
                       int(label[1]), int(label[2]), int(label[3])]
-            
             
     return range_dict
 

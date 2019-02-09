@@ -54,9 +54,9 @@ config['clip_range'] = [-100, 600]
 #For all location configs, make sure they are valid directories, if not make one
 locs = [config['memory_loc'], config['model_loc']]
     
-for l in locs:
-    if not os.path.exists(l):
-        os.makedirs(l)
+#for l in locs:
+#    if not os.path.exists(l):
+#        os.makedirs(l)
         
 
         

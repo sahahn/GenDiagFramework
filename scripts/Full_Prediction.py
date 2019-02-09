@@ -15,11 +15,13 @@ from DataUtils.Seg_tools import proc_prediction
 from DataUtils.max_ap import calculate_max_axial_ap
 
 import nibabel as nib
+import copy
 import os, random
 
+np.warnings.filterwarnings('ignore')
 
 main_dr = '/home/sage/GenDiagFramework/'
-data_loc = '/mnt/sdb2/data/nifti_endoleak/'
+data_loc = '/home/sage/nifti_endoleak/'
 
 RN_input_size = (512, 512, 1)
 Seg_input_size = (1, 128, 128, 128)
@@ -29,63 +31,128 @@ RN_thresh = .75
 folds = 5
 num_snaps = 5
 
-num_to_get = 50
-files = os.listdir(data_loc)
-files = [file.replace('.nii', '').replace('.gz', '') for file in files]
-
-names = random.choices(files, k = num_to_get)
-
+num_to_get = 1
 SAVE = True
 
-RN_dl = RN_DataLoader(
-        init_location = data_loc,
-        label_location = names,
-        in_memory = True 
-        )
+bs = 6
 
-RN_dps = RN_dl.load_unseen()
+already_pred = os.listdir(main_dr + 'predictions/')
+al_p = [file.replace('_pred.nii.gz', ' ') for file in already_pred]
 
-gen = RN_Generator(data_points = RN_dps,
-             dim=RN_input_size,
-             batch_size = 1,
-             n_classes = 1,
-             shuffle = False,
-             augment = False,
-             label_size = 5)
+files = os.listdir(data_loc)
+files = [file for file in files if '_art.nii' in file or '_ven.nii' in file]
+files = [file.replace('.nii', '').replace('.gz', '') for file in files]
+files = [file for file in files if file not in al_p]
 
-model = load_RN_model(main_dr +'saved_models/RN.h5')
+all_names = random.choices(files, k = num_to_get)
+all_dps = []
 
-boxes, scores = get_predictions(model, gen, RN_thresh)
+for name in all_names:
+    print('start - ', name)
 
-del model
-from Models.UNet3D import UNet3D_Extra
+    names = [name]
 
-for i in range(len(boxes)):
-    RN_dps[i].set_pred_label(boxes[i])
-    
-RN_dps = post_process_boxes(RN_dps)
+    RN_dl = RN_DataLoader(
+            init_location = data_loc,
+            label_location = names,
+            in_memory = False,
+            memory_loc = main_dr + '/labels/temp/'
+            )
 
-RN_pred_dps = []
+    RN_dps = RN_dl.load_unseen()
 
-for dp in RN_dps:
-    
-    try:
-        label = list(dp.get_pred_label()[0]) + [1]
-        dp.set_label(label)
+    rem = len(RN_dps) % bs
+    if rem > 0:
+        RN_dps1 = RN_dps[:-rem]
+    else:
+        RN_dps1 = RN_dps
+
+    gen1 = RN_Generator(data_points = RN_dps1,
+                dim=RN_input_size,
+                batch_size = bs,
+                n_classes = 1,
+                shuffle = False,
+                augment = False,
+                label_size = 5)
+
+    model = load_RN_model(main_dr +'saved_models/RN.h5')
+    boxes, scores = get_predictions(model, gen1, RN_thresh)
+
+    if rem > 0:
+
+        RN_dps2 = RN_dps[-rem:]
+
+        gen2 = RN_Generator(data_points = RN_dps2,
+                    dim=RN_input_size,
+                    batch_size = 1,
+                    n_classes = 1,
+                    shuffle = False,
+                    augment = False,
+                    label_size = 5)
         
-        RN_pred_dps.append(dp)
-    except:
-        pass
+        boxes2, scores2 = get_predictions(model, gen2, RN_thresh)
+        boxes += boxes2
+        scores += scores2
 
-del RN_dps
+    for i in range(len(boxes)):
+        RN_dps[i].set_pred_label(boxes[i])
+
+    RN_pred_dps = []
+
+    destroy_thr = .2
+    sec_thr = .5
+    sec_num = 3
+
+    while len(RN_pred_dps) == 0:
+
+        print(sec_thr, end='')
+
+        RN_dps_copy = copy.deepcopy(RN_dps)
+        RN_dps_copy = post_process_boxes(RN_dps_copy, destroy_thr, sec_thr, sec_num)
+
+        for dp in RN_dps_copy:
+        
+            try:
+                label = list(dp.get_pred_label()[0]) + [1]
+                dp.set_label(label)
+
+                RN_pred_dps.append(dp)
+            except:
+                pass
+
+        destroy_thr -= .01
+        sec_thr -= .01
+
+        if destroy_thr % .1 == 0:
+            sec_num+=1
+
+        if sec_thr < 0:
+            print('WARNING!', names)
+            print(scores)
+            break
+
+    del RN_dps
+    #del model
+    
+    all_dps += RN_pred_dps
+    print(names)
+
+try:
+    del model
+except:
+    pass
+
+print('Loading Segs')
+    
+from Models.UNet3D import UNet3D_Extra
 
 Seg_dl = Seg_DataLoader(
         init_location = data_loc,
         label_location =  main_dr + 'labels/leak_segs/',
-        annotations = RN_pred_dps,
+        annotations = all_dps,
         seg_key = 'Garbage',
         n_classes = 2,
-        neg_list = names,
+        neg_list = all_names,
         in_memory = True)
     
 Seg_dps = Seg_dl.get_all()
@@ -103,6 +170,8 @@ model = UNet3D_Extra(input_shape = Seg_input_size, n_labels=2)
 model.compile(optimizer=keras.optimizers.adam(), loss=par_weighted_dice_coefficient_loss)
 
 preds = []
+
+print('Starting AAA Predictions')
     
 for fold in range(folds):
     for s in range(1, num_snaps+1):

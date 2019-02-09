@@ -91,7 +91,7 @@ def find_chunks(nums, destroy_thr=.2, sec_thr=.5, sec_num=3):
                 
     return to_destroy, to_add
 
-def post_process_boxes(data_points):
+def post_process_boxes(data_points, destroy_thr=.2, sec_thr=.5, sec_num=3):
     ''' 
     data_points - A list containing the reference datapoints, assuming that
                   for each datapoint a predicted label of the form:
@@ -123,7 +123,7 @@ def post_process_boxes(data_points):
     #For each unique file, use find_chunks to find a list of slices to destory
     #and to add.
     for name in file_dict:
-        to_destroy, to_add = find_chunks(file_dict[name])
+        to_destroy, to_add = find_chunks(file_dict[name], destroy_thr, sec_thr, sec_num)
         
         #For all labels within to_destory, set pred_label to []
         for d in to_destroy:
