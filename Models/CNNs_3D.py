@@ -6,7 +6,7 @@ from keras.engine import Input
 from keras.layers.convolutional import AveragePooling3D
 
 
-def CNN_3D(input_shape, binary=False, sf=4, d_rate=.3):
+def CNN_3D(input_shape, sf=4, d_rate=.3, regression=False):
     filters = [sf, sf * 2, sf * 4, sf*8, sf*16]
     model = Sequential()
 
@@ -50,7 +50,7 @@ def CNN_3D(input_shape, binary=False, sf=4, d_rate=.3):
     model.add(Flatten())
     model.add(Dense(1))
     
-    if binary:
+    if not regression:
         model.add(Activation('sigmoid'))
         
     #model.summary()

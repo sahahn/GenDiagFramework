@@ -207,7 +207,7 @@ class Resnet3DBuilder(object):
     """ResNet3D."""
 
     @staticmethod
-    def build(input_shape, num_outputs, block_fn, repetitions, reg_factor):
+    def build(input_shape, num_outputs, block_fn, repetitions, reg_factor, regression=False):
         """Instantiate a vanilla ResNet3D keras model.
         # Arguments
             input_shape: Tuple of input shape in the format
@@ -258,7 +258,13 @@ class Resnet3DBuilder(object):
                                  strides=(1, 1, 1))(block_output)
         flatten1 = Flatten()(pool2)
         
-        if num_outputs > 1:
+        if regression:
+            dense = Dense(units=num_outputs,
+                          kernel_initializer="he_normal",
+                          activation="linear",
+                          kernel_regularizer=l2(reg_factor))(flatten1)
+
+        elif num_outputs > 1:
             dense = Dense(units=num_outputs,
                           kernel_initializer="he_normal",
                           activation="softmax",
@@ -266,38 +272,38 @@ class Resnet3DBuilder(object):
         else:
             dense = Dense(units=num_outputs,
                           kernel_initializer="he_normal",
-                          activation="linear",
+                          activation="sigmoid",
                           kernel_regularizer=l2(reg_factor))(flatten1)
 
         model = Model(inputs=input, outputs=dense)
         return model
 
     @staticmethod
-    def build_resnet_18(input_shape, num_outputs, reg_factor=1e-4):
+    def build_resnet_18(input_shape, num_outputs, reg_factor=1e-4, regression=False):
         """Build resnet 18."""
         return Resnet3DBuilder.build(input_shape, num_outputs, basic_block,
-                                     [2, 2, 2, 2], reg_factor=reg_factor)
+                                     [2, 2, 2, 2], reg_factor=reg_factor, regression=regression)
 
     @staticmethod
-    def build_resnet_34(input_shape, num_outputs, reg_factor=1e-4):
+    def build_resnet_34(input_shape, num_outputs, reg_factor=1e-4, regression=False):
         """Build resnet 34."""
         return Resnet3DBuilder.build(input_shape, num_outputs, basic_block,
-                                     [3, 4, 6, 3], reg_factor=reg_factor)
+                                     [3, 4, 6, 3], reg_factor=reg_factor, regression=regression)
 
     @staticmethod
-    def build_resnet_50(input_shape, num_outputs, reg_factor=1e-4):
+    def build_resnet_50(input_shape, num_outputs, reg_factor=1e-4, regression=False):
         """Build resnet 50."""
         return Resnet3DBuilder.build(input_shape, num_outputs, bottleneck,
-                                     [3, 4, 6, 3], reg_factor=reg_factor)
+                                     [3, 4, 6, 3], reg_factor=reg_factor, regression=regression)
 
     @staticmethod
-    def build_resnet_101(input_shape, num_outputs, reg_factor=1e-4):
+    def build_resnet_101(input_shape, num_outputs, reg_factor=1e-4, regression=False):
         """Build resnet 101."""
         return Resnet3DBuilder.build(input_shape, num_outputs, bottleneck,
-                                     [3, 4, 23, 3], reg_factor=reg_factor)
+                                     [3, 4, 23, 3], reg_factor=reg_factor, regression=regression)
 
     @staticmethod
-    def build_resnet_152(input_shape, num_outputs, reg_factor=1e-4):
+    def build_resnet_152(input_shape, num_outputs, reg_factor=1e-4, regression=False):
         """Build resnet 152."""
         return Resnet3DBuilder.build(input_shape, num_outputs, bottleneck,
-                                     [3, 8, 36, 3], reg_factor=reg_factor)
+                                     [3, 8, 36, 3], reg_factor=reg_factor, regression=regression)

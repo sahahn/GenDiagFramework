@@ -15,6 +15,7 @@ class IQ_DataLoader(DataLoader):
                  label_location,
                  seg_input_size=(256,256,256,1),
                  limit=None,
+                 iq=True,
                  scale_labels=False,
                  in_memory=True,
                  memory_loc=None,
@@ -28,6 +29,7 @@ class IQ_DataLoader(DataLoader):
          self.seg_input_size = seg_input_size
          self.scale_labels = scale_labels
          self.scale_info = None
+         self.iq = iq
          
          if limit == None:
              self.limit = 10000000
@@ -40,6 +42,7 @@ class IQ_DataLoader(DataLoader):
         
         ids = []
         scores = []
+        genders = []
         
         with open(self.label_location, 'r') as f:
             lines = f.readlines()
@@ -50,13 +53,17 @@ class IQ_DataLoader(DataLoader):
                     
                     ids.append(line[0])
                     scores.append(float(line[1].strip()))
+                    genders.append(int(line[2].strip()))
                     
         if self.scale_labels:
             scores, self.scale_info = standardize_data(np.array(scores),
                                                      return_reverse=True)
-        
+
         for i in range(len(ids)):
-            self.iq_dict[ids[i]] = scores[i]
+            if self.iq:
+                self.iq_dict[ids[i]] = scores[i]
+            else:
+                self.iq_dict[ids[i]] = genders[i]
         
         
     def load_data(self):
@@ -65,7 +72,7 @@ class IQ_DataLoader(DataLoader):
         names = [name for name in names if 'NDAR' in name]
         
         for name in names:
-            if len(self.data_points) < self.limit:
+            if (len(self.data_points) < self.limit) and (name in self.iq_dict):
             
                 label = self.iq_dict[name]
                 dp = self.create_data_point(name, label)
