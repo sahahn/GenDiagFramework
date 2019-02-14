@@ -12,7 +12,7 @@ from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
 
 
 load = False
-input_dims = (80, 80, 80, 1)
+input_dims = (160, 192, 160, 1)
 scale_labels = False
 initial_lr = .00001
 num_to_load = None
@@ -96,10 +96,6 @@ for p in range(len(preds)):
 true = [dp.get_label() for dp in test]
 pred = [dp.get_pred_label() for dp in test]
 
-#print('True: ')
-#print(true)
-#print('Pred: ')
-#print(pred)
 
 if scale_labels:
  
@@ -107,11 +103,6 @@ if scale_labels:
     
     true = [dp.get_label() for dp in test]
     pred = [dp.get_pred_label() for dp in test]
-    
-#    print('True post reverse: ')
-#    print(true)
-#    print('Pred post reverse: ')
-#    print(pred)
 
 r2_score = r2_score(true, pred)
 print('r2 score: ', r2_score)

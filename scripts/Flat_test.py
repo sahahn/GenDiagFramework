@@ -3,64 +3,91 @@
 
 import keras
 import numpy as np
-from DataLoaders.IQ_DataLoader import IQ_DataLoader
-from Generators.IQ_Generator import IQ_Generator
-from Models.Resnet3D import Resnet3DBuilder
-from Models.CNNs_3D import CNN_3D
+from DataLoaders.Flat_DataLoader import Flat_DataLoader
+from Generators.BC_Generator import BC_Generator
+import keras.applications
+from keras.applications.xception import Xception
+from keras.applications.inception_v3 import InceptionV3
+from keras.applications.resnet50 import ResNet50
+from Models.Resnet50s import ResNet50 as RN_smaller
 from Callbacks.LR_decay import get_callbacks
 from sklearn.metrics import f1_score, roc_auc_score, precision_score, recall_score, accuracy_score
+
+from keras.models import Model
+from keras.layers import Dense
+
+import DataUtils.transform as transform
 import os
 
-os.system('export HDF5_USE_FILE_LOCKING=FALSE')
+#os.system('export HDF5_USE_FILE_LOCKING=FALSE')
 
-input_dims = (160, 192, 160, 1)
-TRAIN = False
+load = False
+map_inds = [0, 1, 2]
+#[thickness, area, avg_curv, curv, volume, sulc]
+#   0          1       2       3     4       5
+
+input_dims = (300, 600, 2*len(map_inds))
+TRAIN = True
 
 initial_lr = .0001
 num_to_load = None
 epochs = 60
 
-load_saved_weights = False
-
 main_dr = '/home/sage/GenDiagFramework/'
-model_loc = main_dr + 'saved_models/Gender_2.h5'
-temp_loc = '/home/sage/temp/'
+model_loc = main_dr + 'saved_models/flat_gender3.h5'
+temp_loc = '/mnt/sdb2/temp/'
 
 preloaded = True
-bs = 4
+bs = 8
 scale_labels = False
 
 if TRAIN:
-    file_dr = '/home/sage/training/'
+    file_dr = '/mnt/sda5/flat_maps/'
 else:
-    file_dr = '/home/sage/testing/'
+    file_dr = '/mnt/sda5/flat_maps/'
 
 def create_gens(train, test):
 
     gen, test_gen = None, None
 
- 
     if train != None:   
-        gen = IQ_Generator(data_points = train,
-                dim=input_dims,
-                batch_size = bs,
-                n_classes = 1,
-                shuffle = True,
-                augment = True,
-                distort = True,
-                dist_scale = .05,
-                flip = False,
-                permute = False,
-                gauss_noise = .001
-                )
+
+        tg = transform.random_transform_generator(
+                    min_rotation=-0.075,
+                    max_rotation=0.075,
+                    min_translation=(-0.001, -0.001),
+                    max_translation=(0.001, 0.001),
+                    min_shear=-0.001,
+                    max_shear=0.001,
+                    min_scaling=(0.99, 0.99),
+                    max_scaling=(1.01, 1.01),
+                    flip_x_chance=0,
+                    flip_y_chance=0)
+
+
+        gen = BC_Generator(
+                 data_points = train,
+                 dim = input_dims,
+                 batch_size = bs,
+                 n_classes = 1,
+                 shuffle = True,
+                 augment = False,
+                 label_size = 1,
+                 transform_generator = tg,
+                 transform_parameters = None)
+
+                
+                
 
     if test != None:
-        test_gen = IQ_Generator(data_points = test,
-                dim=input_dims,
-                batch_size = 1,
-                n_classes = 1,
-                shuffle = False,
-                augment = False)
+        test_gen = BC_Generator(
+                 data_points = test,
+                 dim = input_dims,
+                 batch_size = 1,
+                 n_classes = 1,
+                 shuffle = False,
+                 augment = False,
+                 label_size = 1)
 
     if gen != None and test_gen != None:
         return gen, test_gen
@@ -72,12 +99,11 @@ def create_gens(train, test):
         return test_gen
 
 
-dl = IQ_DataLoader(
+dl = Flat_DataLoader(
                  init_location = file_dr,
                  label_location = main_dr + 'labels/ABCD_genders.csv',
-                 seg_input_size = input_dims,
+                 input_size = map_inds, #Weird yes, but lazy I am
                  limit = num_to_load,
-                 iq = True,
                  scale_labels = scale_labels,
                  in_memory = False,
                  memory_loc = temp_loc,
@@ -85,9 +111,15 @@ dl = IQ_DataLoader(
                  preloaded = preloaded
                  )
 
-rn_builder = Resnet3DBuilder()
-model = rn_builder.build_resnet_18(input_shape=input_dims, num_outputs=1, reg_factor=1e-4, regression=False)
-#model = CNN_3D(input_dims, 4, 0, False)
+#base_model = Xception(include_top=False, weights=None, input_shape = input_dims, classes=1, pooling = 'avg')
+base_model = ResNet50(include_top=False, weights=None, input_shape = input_dims, classes=1, pooling = 'max')
+#base_model = InceptionV3(include_top=False, weights=None, input_shape = input_dims, classes=1, pooling = 'avg')
+
+x = base_model.output
+output_layer = Dense(1, activation='sigmoid')(x)
+model = Model(inputs=base_model.input, outputs=output_layer)
+
+model = RN_smaller(input_shape = input_dims)
 
 if TRAIN:
     train, test = dl.get_train_test_split(.2, 43)
@@ -95,8 +127,7 @@ if TRAIN:
 
     model.compile(loss = 'binary_crossentropy', optimizer = keras.optimizers.adam(initial_lr), metrics=['accuracy'])
 
-    if load_saved_weights:
-
+    if load:
         model.load_weights(model_loc)
         print('loaded weights')
 
@@ -136,7 +167,7 @@ else:
     
     print('roc auc: ', roc_auc_score(true, pred))
     
-    pred = np.array(pred).round()
+    pred = pred.round()
     print('f1 score: ', f1_score(true, pred))
     print('precision score: ', precision_score(true, pred))
     print('recall_score: ',  recall_score(true, pred))

@@ -49,6 +49,13 @@ def normalize_data(data):
     
     return data
 
+
+def stand_and_norm(data):
+    data = standardize_data(data)
+    data = normalize_data(data)
+    
+    return data
+
 def resample(image, new_shape):
 
     

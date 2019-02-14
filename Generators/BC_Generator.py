@@ -14,7 +14,7 @@ class BC_Generator(TwoD_Generator):
                 x, self.transform_parameters.relative_translation)
         
         x = transform.apply_transform(trans, x, self.transform_parameters)        
-        x = np.expand_dims(x, axis=-1)
+        #x = np.expand_dims(x, axis=-1)
         
         return x, y
         
