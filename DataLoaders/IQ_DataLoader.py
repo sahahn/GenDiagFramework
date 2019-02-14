@@ -13,9 +13,8 @@ class IQ_DataLoader(DataLoader):
     def __init__(self,
                  init_location,    
                  label_location,
-                 seg_input_size=(256,256,256,1),
+                 input_size=(256,256,256,1),
                  limit=None,
-                 iq=True,
                  scale_labels=False,
                  in_memory=True,
                  memory_loc=None,
@@ -26,10 +25,9 @@ class IQ_DataLoader(DataLoader):
          super().__init__(init_location, label_location, in_memory, memory_loc,
                          compress, preloaded)
          
-         self.seg_input_size = seg_input_size
+         self.input_size = input_size
          self.scale_labels = scale_labels
          self.scale_info = None
-         self.iq = iq
          
          if limit == None:
              self.limit = 10000000
@@ -42,7 +40,6 @@ class IQ_DataLoader(DataLoader):
         
         ids = []
         scores = []
-        genders = []
         
         with open(self.label_location, 'r') as f:
             lines = f.readlines()
@@ -53,17 +50,15 @@ class IQ_DataLoader(DataLoader):
                     
                     ids.append(line[0])
                     scores.append(float(line[1].strip()))
-                    genders.append(int(line[2].strip()))
                     
+        
         if self.scale_labels:
             scores, self.scale_info = standardize_data(np.array(scores),
                                                      return_reverse=True)
 
         for i in range(len(ids)):
-            if self.iq:
-                self.iq_dict[ids[i]] = scores[i]
-            else:
-                self.iq_dict[ids[i]] = genders[i]
+            self.iq_dict[ids[i]] = scores[i]
+            
         
         
     def load_data(self):
@@ -96,15 +91,15 @@ class IQ_DataLoader(DataLoader):
                 
                     shp = np.shape(data)
                     
-                    if (shp < np.array(self.seg_input_size)).all():
-                        new_data = np.zeros(self.seg_input_size)
+                    if (shp < np.array(self.input_size)).all():
+                        new_data = np.zeros(self.input_size)
             
                         d1 = np.floor((np.shape(new_data) - np.shape(data))/2)
                         d2 = np.ceil((np.shape(new_data) - np.shape(data))/2)
                         new_data[d1[0]:shp[0]+d2[0], d1[1]:shp[1]+d2[1], d1[2]:shp[2]+d2[2]] = data
                     
-                    elif shp != self.seg_input_size:
-                        new_data = resample(data, self.seg_input_size)
+                    elif shp != self.input_size:
+                        new_data = resample(data, self.input_size)
                     
                     else:
                         new_data = data
