@@ -22,7 +22,7 @@ import os
 #os.system('export HDF5_USE_FILE_LOCKING=FALSE')
 
 load = False
-map_inds = [0, 1, 2]
+map_inds = [0, 1, 2, 3, 4, 5]
 #[thickness, area, avg_curv, curv, volume, sulc]
 #   0          1       2       3     4       5
 
@@ -37,8 +37,8 @@ main_dr = '/home/sage/GenDiagFramework/'
 model_loc = main_dr + 'saved_models/flat_iq.h5'
 temp_loc = '/mnt/sdb2/temp/'
 
-preloaded = True
-bs = 8
+preloaded = False
+bs = 4
 scale_labels = False
 
 if TRAIN:
@@ -111,8 +111,8 @@ dl = Flat_DataLoader(
                  preloaded = preloaded
                  )
 
-#base_model = Xception(include_top=False, weights=None, input_shape = input_dims, classes=1, pooling = 'avg')
-base_model = ResNet50(include_top=False, weights=None, input_shape = input_dims, classes=1, pooling = 'max')
+base_model = Xception(include_top=False, weights=None, input_shape = input_dims, classes=1, pooling = 'avg')
+#base_model = ResNet50(include_top=False, weights=None, input_shape = input_dims, classes=1, pooling = 'max')
 #base_model = InceptionV3(include_top=False, weights=None, input_shape = input_dims, classes=1, pooling = 'avg')
 
 x = base_model.output
