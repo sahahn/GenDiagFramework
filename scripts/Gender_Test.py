@@ -75,7 +75,7 @@ def create_gens(train, test):
 dl = IQ_DataLoader(
                  init_location = file_dr,
                  label_location = main_dr + 'labels/ABCD_genders.csv',
-                 seg_input_size = input_dims,
+                 input_size = input_dims,
                  limit = num_to_load,
                  iq = True,
                  scale_labels = scale_labels,

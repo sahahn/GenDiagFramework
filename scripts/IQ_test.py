@@ -48,7 +48,7 @@ def create_gens(train, test):
 dl = IQ_DataLoader(
                  init_location = '/home/sage/training/',
                  label_location = main_dr + 'labels/ABCD_labels.csv',
-                 seg_input_size = input_dims,
+                 input_size = input_dims,
                  limit=num_to_load,
                  scale_labels=scale_labels,
                  in_memory=False,
