@@ -10,8 +10,7 @@ from Models.CNNs_3D import CNN_3D
 from Callbacks.LR_decay import get_callbacks
 from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
 
-
-load = False
+load_weights = False
 input_dims = (160, 192, 160, 1)
 scale_labels = False
 initial_lr = .00001
@@ -20,6 +19,7 @@ epochs = 100
 main_dr = '/home/sage/GenDiagFramework/'
 preloaded = True
 bs = 12
+model_loc = main_dr + 'saved_models/IQ.h5'
 
 def create_gens(train, test):
     
@@ -46,19 +46,18 @@ def create_gens(train, test):
 
 
 dl = IQ_DataLoader(
-                 init_location = '/mnt/sda5/Images/training/',
-                 label_location = '/home/sage/Neuro/ABCD_Challenge/training_fluid_intelligenceV1.csv',
+                 init_location = '/home/sage/training/',
+                 label_location = main_dr + 'labels/ABCD_labels.csv',
                  seg_input_size = input_dims,
                  limit=num_to_load,
                  scale_labels=scale_labels,
                  in_memory=False,
-                 memory_loc='/mnt/sda5/resized/',
+                 memory_loc='/home/sage/temp/',
                  compress=False,
                  preloaded=preloaded
                  )
 
 train, test = dl.get_train_test_split(.2, 43)
-
 print(len(train), len(test))
 
 #rn_builder = Resnet3DBuilder()
@@ -66,14 +65,14 @@ print(len(train), len(test))
 model = CNN_3D(input_dims, 4, .1)
 model.compile(loss = 'mean_squared_error', optimizer = keras.optimizers.adam(initial_lr))
 
-if load:
-    model.load_weights(main_dr + 'saved_models/IQ.h5')
+if load_weights:
+    model.load_weights(model_loc)
     print('loaded weights')
 
 model.summary()
 gen, test_gen = create_gens(train, test)
 
-callbacks = get_callbacks(model_file = main_dr + 'saved_models/IQ.h5',
+callbacks = get_callbacks(model_file = model_loc,
                           initial_learning_rate=initial_lr,
                           learning_rate_drop=.5,
                           learning_rate_epochs=None,

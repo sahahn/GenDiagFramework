@@ -29,7 +29,7 @@ map_inds = [0, 1, 2]
 input_dims = (300, 600, 2*len(map_inds))
 TRAIN = True
 
-initial_lr = .001
+initial_lr = .0001
 num_to_load = None
 epochs = 60
 
@@ -118,8 +118,6 @@ base_model = ResNet50(include_top=False, weights=None, input_shape = input_dims,
 x = base_model.output
 output_layer = Dense(1)(x)
 model = Model(inputs=base_model.input, outputs=output_layer)
-
-model = RN_smaller(input_shape = input_dims)
 
 if TRAIN:
     train, test = dl.get_train_test_split(.2, 43)
