@@ -113,7 +113,7 @@ class IQ_DataLoader(DataLoader):
                         if self.load_segs:
                             seg = resample(seg, self.input_size)
                     
-                    dp.set_data(new_data)
+                    dp.set_data(data)
 
                     if self.load_segs:
                         dp.set_guide_label(seg)
