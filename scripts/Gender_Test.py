@@ -5,6 +5,7 @@ import keras
 import numpy as np
 from DataLoaders.IQ_DataLoader import IQ_DataLoader
 from Generators.IQ_Generator import IQ_Generator
+from Generators.Test_IQ_Generator import Test_IQ_Generator
 from Models.Resnet3D import Resnet3DBuilder
 from Models.CNNs_3D import CNN_3D
 from Callbacks.LR_decay import get_callbacks
@@ -15,6 +16,8 @@ os.system('export HDF5_USE_FILE_LOCKING=FALSE')
 
 input_dims = (160, 192, 160, 1)
 TRAIN = True
+
+to_remove = None
 
 initial_lr = .0001
 num_to_load = None
@@ -119,6 +122,19 @@ if TRAIN:
                         epochs=epochs,
                         callbacks=callbacks)
 
+
+
+elif RUN_EVAL:
+
+    test = dl.get_all()
+    print(len(test))
+
+    model.load_weights(model_loc)
+    print('loaded weights')
+
+    
+
+
 else:
     test = dl.get_all()
     print(len(test))
@@ -126,7 +142,12 @@ else:
     model.load_weights(model_loc)
     print('loaded weights')
 
-    test_gen = create_gens(None, test)
+    test_gen = Test_IQ_Generator(
+                test,
+                dim=input_dims,
+                batch_size=1,
+                n_classes=1,
+                to_remove = to_remove)
 
     preds = model.predict_generator(test_gen, workers=8, verbose=1)
     for p in range(len(preds)):
@@ -142,6 +163,9 @@ else:
     print('precision score: ', precision_score(true, pred))
     print('recall_score: ',  recall_score(true, pred))
     print('acc : ', accuracy_score(true, pred))
+
+
+
                             
                             
           
