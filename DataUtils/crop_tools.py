@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 
-
 def get_crop_ind(image, rtol= 1e-08):
 
     coords = np.argwhere(image > rtol)
