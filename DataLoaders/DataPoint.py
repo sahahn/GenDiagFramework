@@ -31,6 +31,7 @@ class DataPoint():
         self.affine = None
         self.pixdims = None
         self.pred_label = None
+        self.guide_label = None
         
     def set_data(self, data):
         
@@ -76,6 +77,13 @@ class DataPoint():
             self.pred_label = pred_label
         else:
             np.save(self.memory_loc + self.get_ref() + 'pred_label', pred_label)
+
+    def set_guide_label(self, guide_label):
+        
+        if self.in_memory:
+            self.guide_label = guide_label
+        else:
+            np.save(self.memory_loc + self.get_ref() + 'guide_label', guide_label)
         
     def get_ref(self):
         
@@ -132,6 +140,21 @@ class DataPoint():
         else:
             try:
                 return np.load(self.memory_loc + self.get_ref() + 'pred_label.npy')
+            except:
+                return None
+
+
+    def get_guide_label(self, copy=False):
+        
+        if self.in_memory and not copy:
+            return self.guide_label
+        
+        elif self.in_memory and copy:
+            return np.copy(self.guide_label)
+            
+        else:
+            try:
+                return np.load(self.memory_loc + self.get_ref() + 'guide_label.npy')
             except:
                 return None
 

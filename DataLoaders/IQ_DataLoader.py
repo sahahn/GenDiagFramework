@@ -2,6 +2,7 @@
 
 from DataLoaders.DataLoader import DataLoader
 from DataUtils.tools import standardize_data, normalize_data, reverse_standardize_data, resample
+from DataUtils.crop_tools import get_crop_ind, fill_to
 import nibabel as nib
 import nilearn
 import numpy as np
@@ -16,6 +17,7 @@ class IQ_DataLoader(DataLoader):
                  init_location,    
                  label_location,
                  input_size=(256,256,256,1),
+                 load_segs=False,
                  limit=None,
                  scale_labels=False,
                  in_memory=True,
@@ -30,6 +32,7 @@ class IQ_DataLoader(DataLoader):
          self.input_size = input_size
          self.scale_labels = scale_labels
          self.scale_info = None
+         self.load_segs = load_segs
          
          if limit == None:
              self.limit = 10000000
@@ -57,6 +60,7 @@ class IQ_DataLoader(DataLoader):
         
         if self.scale_labels:
             '''Dont know if this is ever a good idea '''
+
             scores, self.scale_info = standardize_data(np.array(scores),
                                                      return_reverse=True)
 
@@ -77,43 +81,46 @@ class IQ_DataLoader(DataLoader):
                 dp = self.create_data_point(name, label)
                 
                 if self.preloaded == False:
-                    try:
-                        #raw_file = nib.load(self.init_location + name + '/baseline/structural/t1_brain.nii.gz')
-                        raw_file = nilearn.image.load_img(self.init_location + name + '/baseline/structural/t1_brain.nii.gz')
-                        raw_file = nilearn.image.crop_img(raw_file)
+
+                    path = self.init_location + name + '/baseline/structural/'
                     
-                    except FileNotFoundError:
-                        print('missing: ', name)
-                        continue
-                
+                    if not os.path.isfile(path + 't1_brain.nii.gz'):
+                        path = self.init_location + name + '/'
+
+                    raw_file = nilearn.image.load_img(path + 't1_brain.nii.gz')
                     dp.set_affine(raw_file.affine)
-                
-                    data = raw_file.get_data() 
+                    
+                    data = raw_file.get_data()
                     data = standardize_data(data)
                     data = normalize_data(data)
+
+                    xs, ys = get_crop_ind(data)
+
+                    data = data[xs[0]:xs[1], ys[0]:ys[1], zs[0]:zs[1]]
                     data = np.expand_dims(data, axis=-1)
-                
-                    shp = np.shape(data)
-                    
-                    if (shp < np.array(self.input_size)).all():
-                        new_data = np.zeros(self.input_size)
-            
-                        d1 = np.floor((np.shape(new_data) - np.shape(data))/2)
-                        d2 = np.ceil((np.shape(new_data) - np.shape(data))/2)
-                        new_data[d1[0]:shp[0]+d2[0], d1[1]:shp[1]+d2[1], d1[2]:shp[2]+d2[2]] = data
-                    
-                    elif shp != self.input_size:
-                        new_data = resample(data, self.input_size)
-                    
-                    else:
-                        new_data = data
+
+                    data = fill_to(data, self.input_size)
+
+                    if self.load_segs:
+                        seg = nilearn.image.load_img(path + 't1_gm_parc.nii.gz').get_data()
+                        seg = seg[xs[0]:xs[1], ys[0]:ys[1], zs[0]:zs[1]]
+
+                        seg = fill_to(data, self.input_size)
+
+                    if np.shape(data) != self.input_size:
+                        data = resample(data, self.input_size)
+
+                        if self.load_segs:
+                            seg = resample(seg, self.input_size)
                     
                     dp.set_data(new_data)
-                
+
+                    if self.load_segs:
+                        dp.set_guide_label(seg)
+
                 self.data_points.append(dp)
                 
-
-    
+                
     def reverse_label_scaling(self):
         
         for dp in self.data_points:
