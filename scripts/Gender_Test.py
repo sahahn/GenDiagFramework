@@ -14,7 +14,7 @@ import os
 os.system('export HDF5_USE_FILE_LOCKING=FALSE')
 
 input_dims = (160, 192, 160, 1)
-TRAIN = False
+TRAIN = True
 
 initial_lr = .0001
 num_to_load = None
@@ -23,10 +23,10 @@ epochs = 60
 load_saved_weights = False
 
 main_dr = '/home/sage/GenDiagFramework/'
-model_loc = main_dr + 'saved_models/Gender_2.h5'
+model_loc = main_dr + 'saved_models/Gender.h5'
 temp_loc = '/home/sage/temp/'
 
-preloaded = True
+preloaded = False
 bs = 4
 scale_labels = False
 
@@ -79,7 +79,6 @@ dl = IQ_DataLoader(
                  input_size = input_dims,
                  load_segs = True,
                  limit = num_to_load,
-                 iq = True,
                  scale_labels = scale_labels,
                  in_memory = False,
                  memory_loc = temp_loc,
