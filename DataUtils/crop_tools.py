@@ -2,7 +2,7 @@
 import numpy as np
 
 
-def get_crop_ind(img, rtol= 1e-08):
+def get_crop_ind(image, rtol= 1e-08):
 
     coords = np.argwhere(image > rtol)
 
