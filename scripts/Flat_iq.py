@@ -22,7 +22,7 @@ import os
 #os.system('export HDF5_USE_FILE_LOCKING=FALSE')
 
 load = False
-map_inds = [0, 1, 2, 3, 4, 5]
+map_inds = [0]
 #[thickness, area, avg_curv, curv, volume, sulc]
 #   0          1       2       3     4       5
 

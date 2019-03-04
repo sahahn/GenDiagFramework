@@ -9,6 +9,8 @@ import os
 
 
 class IQ_DataLoader(DataLoader):
+    '''Dataloader for loading structural T1 MRIs, originally used for predicted iq, thus
+       IQ_DataLoader, but really general purpose. '''
     
     def __init__(self,
                  init_location,    
@@ -35,6 +37,7 @@ class IQ_DataLoader(DataLoader):
              self.limit = limit
     
     def load_labels(self):
+        '''Will work to load any labels of the form, filename w/ NDAR and then a score'''
         
         self.iq_dict = {}
         
@@ -53,6 +56,7 @@ class IQ_DataLoader(DataLoader):
                     
         
         if self.scale_labels:
+            '''Dont know if this is ever a good idea '''
             scores, self.scale_info = standardize_data(np.array(scores),
                                                      return_reverse=True)
 
