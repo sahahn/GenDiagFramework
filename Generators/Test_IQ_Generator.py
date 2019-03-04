@@ -9,7 +9,7 @@ class Test_IQ_Generator(Seg_Generator):
                  batch_size,
                  n_classes,
                  label_size = None,
-                 to_remove = None)
+                 to_remove = None):
 
         super().__init__(data_points, dim, batch_size, n_classes,
              shuffle = False, augment = False, label_size = label_size)

@@ -15,7 +15,7 @@ import os
 os.system('export HDF5_USE_FILE_LOCKING=FALSE')
 
 input_dims = (160, 192, 160, 1)
-TRAIN = True
+TRAIN = False
 
 to_remove = None
 
