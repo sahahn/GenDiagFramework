@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import numpy as np
+import nilearn
 
 def get_crop_ind(image, rtol= 1e-08):
 
