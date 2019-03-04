@@ -96,14 +96,14 @@ class IQ_DataLoader(DataLoader):
 
                     xs, ys = get_crop_ind(data)
 
-                    data = data[xs[0]:xs[1], ys[0]:ys[1], zs[0]:zs[1]]
+                    data = data[xs[0]:ys[0], xs[1]:ys[1], xs[2]:ys[2]]
                     data = np.expand_dims(data, axis=-1)
 
                     data = fill_to(data, self.input_size)
 
                     if self.load_segs:
                         seg = nilearn.image.load_img(path + 't1_gm_parc.nii.gz').get_data()
-                        seg = seg[xs[0]:xs[1], ys[0]:ys[1], zs[0]:zs[1]]
+                        seg = seg[xs[0]:ys[0], xs[1]:ys[1], xs[2]:ys[2]]
 
                         seg = fill_to(data, self.input_size)
 
@@ -120,7 +120,7 @@ class IQ_DataLoader(DataLoader):
 
                 self.data_points.append(dp)
                 
-                
+
     def reverse_label_scaling(self):
         
         for dp in self.data_points:
