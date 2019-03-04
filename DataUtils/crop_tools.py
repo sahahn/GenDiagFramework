@@ -16,7 +16,7 @@ def fill_to(data, input_size):
 
     shp = np.shape(data)
 
-    if (shp < np.array(input_size)).all():
+    if (shp[:-1] < np.array(input_size)[:-1]).all():
         new_data = np.zeros(input_size)
 
         d1 = np.floor((np.shape(new_data) - np.shape(data))/2)
