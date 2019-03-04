@@ -15,17 +15,14 @@ def fill_to(data, input_size):
 
     shp = np.shape(data)
 
-    print(np.shape(data))
-
     if (shp[:-1] < np.array(input_size)[:-1]).all():
         new_data = np.zeros(input_size)
-
-        print(np.shape(new_data))
-
-        d1 = np.floor((np.shape(new_data) - np.shape(data))/2)
-        d2 = np.ceil((np.shape(new_data) - np.shape(data))/2)
         
-        new_data[d1[0]:shp[0]+d2[0], d1[1]:shp[1]+d2[1], d1[2]:shp[2]+d2[2]] = data
+        shp = np.array(shp)
+        shp2 = np.array(input_size)
+        
+        d = np.floor((shp2 - shp)/2).astype(int)
+        new_data[d[0]:shp[0]+d[0], d[1]:shp[1]+d[1], d[2]:shp[2]+d[2]] = data
         
         return new_data
 

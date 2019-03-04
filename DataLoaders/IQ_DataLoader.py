@@ -109,6 +109,7 @@ class IQ_DataLoader(DataLoader):
                         seg = fill_to(seg, self.input_size)
 
                     if np.shape(data) != self.input_size:
+                        print('resample')
                         data = resample(data, self.input_size)
 
                         if self.load_segs:
