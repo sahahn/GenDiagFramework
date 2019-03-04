@@ -26,7 +26,7 @@ class Test_IQ_Generator(Seg_Generator):
 
             seg = self.data_points[ID].get_guide_label()
 
-            for i in to_remove:
+            for i in self.to_remove:
                 x[seg == i] = 0
 
         return x, y
