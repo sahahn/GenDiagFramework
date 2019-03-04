@@ -72,10 +72,12 @@ def create_gens(train, test):
         return test_gen
 
 
+
 dl = IQ_DataLoader(
                  init_location = file_dr,
                  label_location = main_dr + 'labels/ABCD_genders.csv',
                  input_size = input_dims,
+                 load_segs = True,
                  limit = num_to_load,
                  iq = True,
                  scale_labels = scale_labels,
@@ -143,3 +145,18 @@ else:
     print('acc : ', accuracy_score(true, pred))
                             
                             
+from DataLoaders.IQ_DataLoader import IQ_DataLoader 
+
+
+main_dr = '/home/sage/GenDiagFramework/' 
+dl = IQ_DataLoader( 
+                     init_location = file_dr, 
+                     label_location = main_dr + 'labels/ABCD_genders.csv', 
+                     input_size = (160, 192, 160, 1), 
+                     load_segs = True, 
+                     limit = 10, 
+                     in_memory = True, 
+                     memory_loc = None, 
+                     compress = False, 
+                     preloaded = False 
+                     )                        
