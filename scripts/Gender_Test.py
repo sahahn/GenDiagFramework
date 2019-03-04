@@ -29,7 +29,7 @@ main_dr = '/home/sage/GenDiagFramework/'
 model_loc = main_dr + 'saved_models/Gender.h5'
 temp_loc = '/home/sage/temp/'
 
-preloaded = False
+preloaded = True
 bs = 4
 scale_labels = False
 

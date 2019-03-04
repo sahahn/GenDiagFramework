@@ -22,7 +22,7 @@ class Test_IQ_Generator(Seg_Generator):
         x = self.data_points[ID].get_data(copy=True)
         y = self.data_points[ID].get_label(copy=True)
 
-        if to_remove != None:
+        if self.to_remove != None:
 
             seg = self.data_points[ID].get_guide_label()
 
