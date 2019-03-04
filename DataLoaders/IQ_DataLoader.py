@@ -105,7 +105,7 @@ class IQ_DataLoader(DataLoader):
                         seg = nilearn.image.load_img(path + 't1_gm_parc.nii.gz').get_data()
                         seg = seg[xs[0]:ys[0], xs[1]:ys[1], xs[2]:ys[2]]
 
-                        seg = fill_to(data, self.input_size)
+                        seg = fill_to(seg, self.input_size)
 
                     if np.shape(data) != self.input_size:
                         data = resample(data, self.input_size)
