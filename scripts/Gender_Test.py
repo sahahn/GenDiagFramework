@@ -123,18 +123,6 @@ if TRAIN:
                         callbacks=callbacks)
 
 
-
-elif RUN_EVAL:
-
-    test = dl.get_all()
-    print(len(test))
-
-    model.load_weights(model_loc)
-    print('loaded weights')
-
-    
-
-
 else:
     test = dl.get_all()
     print(len(test))
