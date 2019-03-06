@@ -49,7 +49,7 @@ for i in range(5):
         data = dp.get_data()
         data[seg==j] = 0
         
-        score = model.predict(data)[0][0]
+        score = model.predict(np.expand_dims(data, axis=0))[0][0]
         print(j, score)
     
     
