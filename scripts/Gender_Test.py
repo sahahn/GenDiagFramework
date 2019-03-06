@@ -17,7 +17,7 @@ os.system('export HDF5_USE_FILE_LOCKING=FALSE')
 input_dims = (160, 192, 160, 1)
 TRAIN = False
 
-to_remove = None
+#to_remove = None
 
 initial_lr = .0001
 num_to_load = None
@@ -30,7 +30,7 @@ model_loc = main_dr + 'saved_models/Gender.h5'
 temp_loc = '/home/sage/temp/'
 
 preloaded = True
-bs = 4
+bs = 8
 scale_labels = False
 
 if TRAIN:
@@ -89,9 +89,9 @@ dl = IQ_DataLoader(
                  preloaded = preloaded
                  )
 
-rn_builder = Resnet3DBuilder()
-model = rn_builder.build_resnet_18(input_shape=input_dims, num_outputs=1, reg_factor=1e-4, regression=False)
-#model = CNN_3D(input_dims, 4, 0, False)
+#rn_builder = Resnet3DBuilder()
+#model = rn_builder.build_resnet_18(input_shape=input_dims, num_outputs=1, reg_factor=1e-4, regression=False)
+model = CNN_3D(input_dims, 4, 0, False)
 
 if TRAIN:
     train, test = dl.get_train_test_split(.2, 43)
@@ -129,30 +129,34 @@ else:
 
     model.load_weights(model_loc)
     print('loaded weights')
-
-    test_gen = Test_IQ_Generator(
-                test,
-                dim=input_dims,
-                batch_size=1,
-                n_classes=1,
-                to_remove = to_remove)
-
-    preds = model.predict_generator(test_gen, workers=8, verbose=1)
-    for p in range(len(preds)):
-        test[p].set_pred_label(float(preds[p]))
     
-    true = [dp.get_label() for dp in test]
-    pred = [dp.get_pred_label() for dp in test]
-    
-    print('roc auc: ', roc_auc_score(true, pred))
-    
-    pred = np.array(pred).round()
-    print('f1 score: ', f1_score(true, pred))
-    print('precision score: ', precision_score(true, pred))
-    print('recall_score: ',  recall_score(true, pred))
-    print('acc : ', accuracy_score(true, pred))
+    for i in range(24, 108):
 
+        to_remove = [i]
+        test_gen = Test_IQ_Generator(
+                    test,
+                    dim=input_dims,
+                    batch_size=bs,
+                    n_classes=1,
+                    to_remove = to_remove)
 
+        preds = model.predict_generator(test_gen, workers=8, verbose=1)
+        for p in range(len(preds)):
+            test[p].set_pred_label(float(preds[p]))
+    
+        true = [dp.get_label() for dp in test]
+        pred = [dp.get_pred_label() for dp in test]
+        #print(to_remove)
+        #print('roc auc: ', roc_auc_score(true, pred))
+        r = roc_auc_score(true, pred)
+        #pred = np.array(pred).round()
+        #print('f1 score: ', f1_score(true, pred))
+        #f = f1_score(true, pred)
+        #print('precision score: ', precision_score(true, pred))
+        #print('recall_score: ',  recall_score(true, pred))
+        #print('acc : ', accuracy_score(true, pred))
+        print(i, r)
+        
 
                             
                             
