@@ -50,11 +50,12 @@ def create_gens(train, test):
                 n_classes = 1,
                 shuffle = True,
                 augment = True,
-                distort = True,
+                distort = False,
                 dist_scale = .05,
                 flip = False,
                 permute = False,
-                gauss_noise = .001
+                gauss_noise = .001,
+                rand_seg_remove = 3
                 )
 
     if test != None:
