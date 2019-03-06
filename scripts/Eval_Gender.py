@@ -33,7 +33,7 @@ test = dl.get_all()
 
  #x[seg == i] = 0
 
-for i in range(5):
+for i in range(len(test)):
     
     dp = test[i]
     
@@ -42,16 +42,26 @@ for i in range(5):
     
     baseline = model.predict(np.expand_dims(dp.get_data(), axis=0))[0][0]
     
-    print(baseline, label)
+    print(i)
     
-    for j in range(1,109):
+    with open('results.csv', 'a') as f:
         
-        data = dp.get_data()
-        data[seg==j] = 0
-        
-        score = model.predict(np.expand_dims(data, axis=0))[0][0]
-        print(j, score)
+        f.write(str(baseline))
+        f.write(',')
+        f.write(str(label))
+        f.write(',')
     
+        for j in range(1,109):
+            
+            data = dp.get_data()
+            data[seg==j] = 0
+            
+            score = model.predict(np.expand_dims(data, axis=0))[0][0]
+            f.write(str(score))
+            f.write(',')
+            
+        f.write('\n')
+        
     
     
 
