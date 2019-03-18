@@ -4,6 +4,7 @@ from DataLoaders.DataLoader import DataLoader
 from DataUtils.tools import standardize_data, normalize_data, resample
 from DataUtils.crop_tools import get_crop_ind, fill_to
 from DataUtils.loader_helper import smart_load, read_t_transform
+from nilearn.image import new_img_like
 import nibabel as nib
 import nilearn
 import numpy as np
