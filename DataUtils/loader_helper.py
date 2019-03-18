@@ -1,5 +1,6 @@
 import nibabel as nib
 import os
+import numpy as np
 
 def smart_load(path):
 
