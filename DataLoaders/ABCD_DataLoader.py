@@ -86,7 +86,7 @@ class ABCD_DataLoader(DataLoader):
                     data = data[xs[0]:ys[0], xs[1]:ys[1], xs[2]:ys[2]]
 
                     shapes.append(np.shape(data))
-                    print(np.max(shapes), axis=0)
+                    print(np.max(shapes, axis=0))
 
                     data = np.expand_dims(data, axis=-1)
                     data = fill_to(data, self.input_size)
