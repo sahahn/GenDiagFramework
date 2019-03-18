@@ -74,7 +74,7 @@ class ABCD_DataLoader(DataLoader):
                     if self.tal_transform:
                         tal_affine = read_t_transform(os.path.join(self.init_location, name, self.tal_key))
                         new_affine = raw_file.affine.dot(tal_affine)
-                        raw_file   = new_img_like(raw_file, data=raw_file.get_fdata(), affine=new_affine)
+                        raw_file   = new_img_like(raw_file, data=raw_file.get_data(), affine=new_affine)
 
                     dp.set_affine(raw_file.affine)
                     data = raw_file.get_fdata()
@@ -95,7 +95,7 @@ class ABCD_DataLoader(DataLoader):
                         if self.tal_transform:
                             tal_affine = read_t_transform(os.path.join(self.init_location, name, self.tal_key))
                             new_affine = raw_seg.affine.dot(tal_affine)
-                            raw_seg    = new_img_like(raw_seg, data=raw_seg.get_fdata(), affine=new_affine)
+                            raw_seg    = new_img_like(raw_seg, data=raw_seg.get_data(), affine=new_affine)
 
                         seg = seg[xs[0]:ys[0], xs[1]:ys[1], xs[2]:ys[2]]
 
