@@ -4,7 +4,7 @@ from DataLoaders.DataLoader import DataLoader
 from DataUtils.tools import standardize_data, normalize_data, resample
 from DataUtils.crop_tools import get_crop_ind, fill_to
 from DataUtils.loader_helper import smart_load, read_t_transform
-from nilearn.image import new_img_like
+from nilearn.image import resample_img
 import nibabel as nib
 import nilearn
 import numpy as np
@@ -76,10 +76,10 @@ class ABCD_DataLoader(DataLoader):
                     if self.tal_transform:
                         tal_affine = read_t_transform(os.path.join(self.init_location, name, self.tal_key))
                         new_affine = raw_file.affine.dot(tal_affine)
-                        raw_file   = new_img_like(raw_file, data=raw_file.get_data(), affine=new_affine)
+                        raw_file   = resample_img(raw_file, target_affine=new_affine, interpolation="continuous")
 
                     dp.set_affine(raw_file.affine)
-                    data = raw_file.get_fdata()
+                    data = raw_file.get_data()
                     data = normalize_data(data)
 
                     xs, ys = get_crop_ind(data)
@@ -94,14 +94,15 @@ class ABCD_DataLoader(DataLoader):
 
                     if self.load_segs:
                         
-                        seg_path = os.path.join(self.init_location, name, self.seg_key)
+                        seg_path = os.path.join(self.init_location, name, self.segs_key)
                         raw_seg = smart_load(seg_path)
 
                         if self.tal_transform:
                             tal_affine = read_t_transform(os.path.join(self.init_location, name, self.tal_key))
                             new_affine = raw_seg.affine.dot(tal_affine)
-                            raw_seg    = new_img_like(raw_seg, data=raw_seg.get_data(), affine=new_affine)
-
+                            raw_seg   = resample_img(raw_seg, target_affine=new_affine, interpolation="nearest"
+                            
+                        seg = raw_seg.get_data()
                         seg = seg[xs[0]:ys[0], xs[1]:ys[1], xs[2]:ys[2]]
 
                         seg = np.expand_dims(seg, axis=-1)
