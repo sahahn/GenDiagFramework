@@ -64,7 +64,7 @@ class ABCD_DataLoader(DataLoader):
         
         for name in names:
             if (len(self.data_points) < self.limit):
-                dp = self.create_data_point(name, self.iq_dict[name])
+                dp = self.create_data_point(name, self.label_dict[name])
                 
                 if self.preloaded == False:
                     path = os.path.join(self.init_location, name, self.file_key)
