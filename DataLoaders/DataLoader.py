@@ -9,6 +9,7 @@ from sklearn.model_selection import train_test_split
 from DataLoaders.DataPoint import DataPoint
 from sklearn.model_selection import KFold
 import numpy as np
+import os
 
 class DataLoader():
     '''Abstract DataLoader Class'''
@@ -33,11 +34,9 @@ class DataLoader():
         preloaded - Flag to indicate if data has already been saved in temp mem spot
         '''
         
-        self.init_location = init_location
-        if self.init_location[-1] != '/':
-             self.init_location += '/'
-             
-        self.label_location = label_location
+        self.init_location = os.path.abspath(init_location)
+        self.label_location = os.path.abspath(label_location)
+        
         self.in_memory = in_memory
         self.memory_loc = memory_loc
         self.compress = compress
