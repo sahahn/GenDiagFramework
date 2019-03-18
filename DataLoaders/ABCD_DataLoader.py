@@ -60,7 +60,7 @@ class ABCD_DataLoader(DataLoader):
     def load_data(self):
         
         file_names = os.listdir(self.init_location)
-        names = [name for name in names if name in self.label_dict]
+        names = [name for name in file_names if name in self.label_dict]
         
         for name in names:
             if (len(self.data_points) < self.limit):
