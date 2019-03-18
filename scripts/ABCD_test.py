@@ -14,9 +14,9 @@ dl = ABCD_DataLoader(
                  segs_key='aparc.a2009s+aseg.mgz',
                  tal_transform=True,
                  tal_key='talairach.xfm',
-                 limit=20,
-                 in_memory=True,
-                 memory_loc=None,
+                 limit=None,
+                 in_memory=False,
+                 memory_loc='/home/sage/temp/',
                  compress=False,
                  preloaded=False
                  )

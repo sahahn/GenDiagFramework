@@ -59,6 +59,8 @@ class ABCD_DataLoader(DataLoader):
                     self.label_dict[line[0]] = float(line[1].strip())
             
     def load_data(self):
+
+        shapes = []
         
         file_names = os.listdir(self.init_location)
         names = [name for name in file_names if name in self.label_dict]
@@ -82,6 +84,9 @@ class ABCD_DataLoader(DataLoader):
 
                     xs, ys = get_crop_ind(data)
                     data = data[xs[0]:ys[0], xs[1]:ys[1], xs[2]:ys[2]]
+
+                    shapes.append(np.shape(data))
+                    print(np.max(shapes), axis=0)
 
                     data = np.expand_dims(data, axis=-1)
                     data = fill_to(data, self.input_size)
@@ -115,6 +120,8 @@ class ABCD_DataLoader(DataLoader):
                         dp.set_guide_label(seg)
 
                 self.data_points.append(dp)
+
+
 
     #All Unique patients, so just override get_patient, w/ get name instead
     def get_unique_patients(self):
