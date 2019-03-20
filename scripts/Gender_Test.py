@@ -92,7 +92,7 @@ dl = IQ_DataLoader(
 
 #rn_builder = Resnet3DBuilder()
 #model = rn_builder.build_resnet_18(input_shape=input_dims, num_outputs=1, reg_factor=1e-4, regression=False)
-model = CNN_3D(input_dims, 4, 0, False)
+model = CNN_3D(input_dims, 4, 0, True)
 
 if TRAIN:
     train, test = dl.get_train_test_split(.2, 43)

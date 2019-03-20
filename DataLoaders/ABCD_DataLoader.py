@@ -110,7 +110,7 @@ class ABCD_DataLoader(DataLoader):
                             seg = fill_to(seg, self.input_size)
 
                         if np.shape(data) != self.input_size:
-                            print('resample')
+                            print('resample', np.shape(data), name)
                             data = resample(data, self.input_size)
 
                             if self.load_segs:
