@@ -70,59 +70,62 @@ class ABCD_DataLoader(DataLoader):
                 dp = self.create_data_point(name, self.label_dict[name])
                 
                 if self.preloaded == False:
-                    path = os.path.join(self.init_location, name, self.file_key)
-                    raw_file = smart_load(path)
 
-                    if self.tal_transform:
-                        tal_affine = read_t_transform(os.path.join(self.init_location, name, self.tal_key))
-                        new_affine = raw_file.affine.dot(tal_affine)
-                        raw_file   = resample_img(raw_file, target_affine=new_affine, interpolation="continuous")
-
-                    dp.set_affine(raw_file.affine)
-                    data = raw_file.get_data()
-                    data = normalize_data(data)
-
-                    xs, ys = get_crop_ind(data)
-                    data = data[xs[0]:ys[0], xs[1]:ys[1], xs[2]:ys[2]]
-
-                    shapes.append(np.shape(data))
-                    print(np.max(shapes, axis=0))
-
-                    data = np.expand_dims(data, axis=-1)
-                    data = fill_to(data, self.input_size)
-
-
-                    if self.load_segs:
-                        
-                        seg_path = os.path.join(self.init_location, name, self.segs_key)
-                        raw_seg = smart_load(seg_path)
+                    try:
+                        path = os.path.join(self.init_location, name, self.file_key)
+                        raw_file = smart_load(path)
 
                         if self.tal_transform:
                             tal_affine = read_t_transform(os.path.join(self.init_location, name, self.tal_key))
-                            new_affine = raw_seg.affine.dot(tal_affine)
-                            raw_seg   = resample_img(raw_seg, target_affine=new_affine, interpolation="nearest"
-                            
-                        seg = raw_seg.get_data()
-                        seg = seg[xs[0]:ys[0], xs[1]:ys[1], xs[2]:ys[2]]
+                            new_affine = raw_file.affine.dot(tal_affine)
+                            raw_file   = resample_img(raw_file, target_affine=new_affine, interpolation="continuous")
 
-                        seg = np.expand_dims(seg, axis=-1)
-                        seg = fill_to(seg, self.input_size)
+                        dp.set_affine(raw_file.affine)
+                        data = raw_file.get_data()
+                        data = normalize_data(data)
 
-                    if np.shape(data) != self.input_size:
-                        print('resample')
-                        data = resample(data, self.input_size)
+                        xs, ys = get_crop_ind(data)
+                        data = data[xs[0]:ys[0], xs[1]:ys[1], xs[2]:ys[2]]
+
+                        shapes.append(np.shape(data))
+
+                        data = np.expand_dims(data, axis=-1)
+                        data = fill_to(data, self.input_size)
+
 
                         if self.load_segs:
-                            seg = resample(seg, self.input_size)
-        
-                    dp.set_data(data)
+                            
+                            seg_path = os.path.join(self.init_location, name, self.segs_key)
+                            raw_seg = smart_load(seg_path)
 
-                    if self.load_segs:
-                        dp.set_guide_label(seg)
+                            if self.tal_transform:
+                                tal_affine = read_t_transform(os.path.join(self.init_location, name, self.tal_key))
+                                new_affine = raw_seg.affine.dot(tal_affine)
+                                raw_seg   = resample_img(raw_seg, target_affine=new_affine, interpolation="nearest"
+                                
+                            seg = raw_seg.get_data()
+                            seg = seg[xs[0]:ys[0], xs[1]:ys[1], xs[2]:ys[2]]
+
+                            seg = np.expand_dims(seg, axis=-1)
+                            seg = fill_to(seg, self.input_size)
+
+                        if np.shape(data) != self.input_size:
+                            print('resample')
+                            data = resample(data, self.input_size)
+
+                            if self.load_segs:
+                                seg = resample(seg, self.input_size)
+            
+                        dp.set_data(data)
+
+                        if self.load_segs:
+                            dp.set_guide_label(seg)
+                    except:
+                        print('error with', name)
 
                 self.data_points.append(dp)
 
-
+        print(np.max(shapes, axis=0))
 
     #All Unique patients, so just override get_patient, w/ get name instead
     def get_unique_patients(self):
