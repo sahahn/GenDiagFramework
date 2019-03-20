@@ -13,7 +13,7 @@ os.system('export HDF5_USE_FILE_LOCKING=FALSE')
 TRAIN = True
 
 initial_lr = .0001
-num_to_load = None
+num_to_load = 1000
 epochs = 60
 
 input_dims = (160, 192, 192, 1)
@@ -23,7 +23,7 @@ load_saved_weights = False
 model_loc = main_dr + 'saved_models/ADHD.h5'
 temp_loc = '/home/sage/temp/'
 
-preloaded = True
+preloaded = False
 bs = 8
 
 def create_gens(train, test):
@@ -70,7 +70,7 @@ dl = ABCD_DataLoader(
                  input_size=input_dims,
                  load_segs=False,
                  segs_key='aparc.a2009s+aseg.mgz',
-                 tal_transform=True,
+                 tal_transform=False,
                  tal_key='talairach.xfm',
                  limit=num_to_load,
                  in_memory=False,

@@ -45,7 +45,7 @@ class ABCD_DataLoader(DataLoader):
              self.limit = 10000000
          else:
              self.limit = limit
-    
+         
     def load_labels(self):
         
         self.label_dict = {}
@@ -134,3 +134,13 @@ class ABCD_DataLoader(DataLoader):
         return np.array(patients)
         
         
+    def get_data_points_by_patient(self, patients):
+
+        relevant = []
+
+        for dp in self.data_points:
+            if dp.get_name() in patients:
+                relevant.append(dp)
+
+        return relevant
+
