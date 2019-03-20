@@ -101,7 +101,7 @@ class ABCD_DataLoader(DataLoader):
                             if self.tal_transform:
                                 tal_affine = read_t_transform(os.path.join(self.init_location, name, self.tal_key))
                                 new_affine = raw_seg.affine.dot(tal_affine)
-                                raw_seg   = resample_img(raw_seg, target_affine=new_affine, interpolation="nearest"
+                                raw_seg   = resample_img(raw_seg, target_affine=new_affine, interpolation="nearest")
                                 
                             seg = raw_seg.get_data()
                             seg = seg[xs[0]:ys[0], xs[1]:ys[1], xs[2]:ys[2]]
