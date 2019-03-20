@@ -81,7 +81,7 @@ class ABCD_DataLoader(DataLoader):
                         raw_file   = resample_img(raw_file, target_affine=new_affine, interpolation="continuous")
 
                     dp.set_affine(raw_file.affine)
-                    data = raw_file.get_data()
+                    data = raw_file.get_fdata()
                     data = normalize_data(data)
 
                     xs, ys = get_crop_ind(data)
