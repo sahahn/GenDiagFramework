@@ -23,7 +23,7 @@ load_saved_weights = False
 model_loc = main_dr + 'saved_models/Gender.h5'
 temp_loc = '/home/sage/temp/'
 
-preloaded = False
+preloaded = True
 bs = 2
 
 def create_gens(train, test):
@@ -85,8 +85,8 @@ model = rn_builder.build_resnet_50(input_shape=input_dims, num_outputs=1, reg_fa
 
 
 if TRAIN:
-    train, test = dl.get_train_test_split(.2, 43)
-    print(len(train), len(test))
+    train, test, val = dl.get_train_test_val_split(.2, .1, 43)
+    print(len(train), len(test), len(val))
 
     model.compile(loss = 'binary_crossentropy', optimizer = keras.optimizers.adam(initial_lr), metrics=['accuracy'])
 
@@ -96,7 +96,7 @@ if TRAIN:
         print('loaded weights')
 
     model.summary()
-    gen, test_gen = create_gens(train, test)
+    gen, test_gen = create_gens(train, val)
 
     callbacks = get_callbacks(model_file = model_loc,
                             initial_learning_rate=initial_lr,
