@@ -13,18 +13,18 @@ os.system('export HDF5_USE_FILE_LOCKING=FALSE')
 TRAIN = True
 
 initial_lr = .0001
-num_to_load = 1000
+num_to_load = None
 epochs = 60
 
 input_dims = (192, 192, 192, 1)
 main_dr = '/home/sage/GenDiagFramework/'
 load_saved_weights = False
 
-model_loc = main_dr + 'saved_models/ADHD.h5'
+model_loc = main_dr + 'saved_models/ADHD_b.h5'
 temp_loc = '/home/sage/temp/'
 
-preloaded = True
-bs = 4
+preloaded = False
+bs = 2
 
 def create_gens(train, test):
 
@@ -37,7 +37,7 @@ def create_gens(train, test):
                 batch_size = bs,
                 n_classes = 1,
                 shuffle = True,
-                augment = True,
+                augment = False,
                 distort = True,
                 gauss_noise = .001,
                 rand_seg_remove = 0
@@ -64,13 +64,13 @@ def create_gens(train, test):
 
 dl = ABCD_DataLoader(
                  init_location = '/home/sage/FS2/FS_data_release_2/',
-                 label_location = main_dr + 'labels/adhd_scores.csv',
+                 label_location = main_dr + 'labels/adhd_binary.csv',
                  label_key='NDAR',
                  file_key='brain.finalsurfs.mgz',
                  input_size=input_dims,
-                 load_segs=True,
+                 load_segs=False,
                  segs_key='aparc.a2009s+aseg.mgz',
-                 tal_transform=True,
+                 tal_transform=False,
                  tal_key='talairach.xfm',
                  limit=num_to_load,
                  in_memory=False,
@@ -79,14 +79,16 @@ dl = ABCD_DataLoader(
                  preloaded=preloaded
                  )
 
-model = CNN_3D(input_dims, 8, .1, True)
+rn_builder = Resnet3DBuilder()
+model = rn_builder.build_resnet_50(input_shape=input_dims, num_outputs=1, reg_factor=1e-4)
+#model = CNN_3D(input_dims, 8, .1, False)
 
 
 if TRAIN:
     train, test = dl.get_train_test_split(.2, 43)
     print(len(train), len(test))
 
-    model.compile(loss = 'mean_squared_error', optimizer = keras.optimizers.adam(initial_lr))
+    model.compile(loss = 'binary_crossentropy', optimizer = keras.optimizers.adam(initial_lr), metrics=['accuracy'])
 
     if load_saved_weights:
 
