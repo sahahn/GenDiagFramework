@@ -6,12 +6,13 @@ from Generators.IQ_Generator import IQ_Generator
 from Models.Resnet3D import Resnet3DBuilder
 from Models.CNNs_3D import CNN_3D
 from Callbacks.LR_decay import get_callbacks
-from sklearn.metrics import f1_score, roc_auc_score, precision_score, recall_score, accuracy_score
+from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
 import os, sys
+
 np.warnings.filterwarnings('ignore')
 os.system('export HDF5_USE_FILE_LOCKING=FALSE')
 
-TRAIN = False
+TRAIN = True
 
 initial_lr = .0001
 num_to_load = None
