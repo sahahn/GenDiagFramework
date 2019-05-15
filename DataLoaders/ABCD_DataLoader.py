@@ -21,8 +21,6 @@ class ABCD_DataLoader(DataLoader):
                  input_size=(256,256,256,1),
                  load_segs=False,
                  segs_key='aparc.a2009s+aseg.mgz',
-                 tal_transform=True,
-                 tal_key='talairach.xfm',
                  limit=None,
                  in_memory=True,
                  memory_loc=None,
@@ -38,8 +36,6 @@ class ABCD_DataLoader(DataLoader):
          self.input_size = input_size
          self.load_segs = load_segs
          self.segs_key = segs_key
-         self.tal_transform = tal_transform
-         self.tal_key = tal_key
          
          if limit == None:
              self.limit = 10000000
@@ -71,62 +67,47 @@ class ABCD_DataLoader(DataLoader):
                 
                 if self.preloaded == False:
 
-                    try:
-                        path = os.path.join(self.init_location, name, self.file_key)
-                        raw_file = smart_load(path)
+                    path = os.path.join(self.init_location, name, self.file_key)
+                    raw_file = smart_load(path)
+                    
+                    dp.set_affine(raw_file.affine)
+                    data = raw_file.get_fdata()
+                    data = normalize_data(data)
 
-                        if self.tal_transform:
-                            tal_affine = read_t_transform(os.path.join(self.init_location, name, self.tal_key))
-                            new_affine = raw_file.affine.dot(tal_affine)
-                            raw_file   = resample_img(raw_file, target_affine=new_affine, interpolation="continuous")
+                    xs, ys = get_crop_ind(data)
+                    data = data[xs[0]:ys[0], xs[1]:ys[1], xs[2]:ys[2]]
 
-                        raw_file = nib.processing.resample_to_output(raw_file)
-                        
-                        dp.set_affine(raw_file.affine)
-                        data = raw_file.get_fdata()
-                        data = normalize_data(data)
+                    shapes.append(np.shape(data))
 
-                        xs, ys = get_crop_ind(data)
-                        data = data[xs[0]:ys[0], xs[1]:ys[1], xs[2]:ys[2]]
+                    data = np.expand_dims(data, axis=-1)
+                    data = fill_to(data, self.input_size)
 
-                        shapes.append(np.shape(data))
+                    if self.load_segs:
 
-                        data = np.expand_dims(data, axis=-1)
-                        data = fill_to(data, self.input_size)
-
-
-                        if self.load_segs:
-                            
+                        try:
                             seg_path = os.path.join(self.init_location, name, self.segs_key)
                             raw_seg = smart_load(seg_path)
-
-                            if self.tal_transform:
-                                tal_affine = read_t_transform(os.path.join(self.init_location, name, self.tal_key))
-                                new_affine = raw_seg.affine.dot(tal_affine)
-                                raw_seg   = resample_img(raw_seg, target_affine=new_affine, interpolation="nearest")
-                            
-                            raw_seg = nib.processing.resample_to_output(raw_seg)
-                            
 
                             seg = raw_seg.get_data()
                             seg = seg[xs[0]:ys[0], xs[1]:ys[1], xs[2]:ys[2]]
 
                             seg = np.expand_dims(seg, axis=-1)
                             seg = fill_to(seg, self.input_size)
+                        except:
+                            print('error with segmentation ', )
 
-                        if np.shape(data) != self.input_size:
-                            print('resample', np.shape(data), name)
-                            data = resample(data, self.input_size)
-
-                            if self.load_segs:
-                                seg = resample(seg, self.input_size)
-            
-                        dp.set_data(data)
+                    if np.shape(data) != self.input_size:
+                        
+                        print('resample', np.shape(data), name)
+                        data = resample(data, self.input_size)
 
                         if self.load_segs:
-                            dp.set_guide_label(seg)
-                    except:
-                        print('error with', name)
+                            seg = resample(seg, self.input_size)
+        
+                    dp.set_data(data)
+
+                    if self.load_segs:
+                        dp.set_guide_label(seg)
 
                 self.data_points.append(dp)
         
@@ -138,7 +119,6 @@ class ABCD_DataLoader(DataLoader):
         
         patients = sorted([dp.get_name() for dp in self.data_points])
         return np.array(patients)
-        
         
     def get_data_points_by_patient(self, patients):
 
