@@ -50,10 +50,12 @@ def CNN_3D(input_shape, sf=4, d_rate=.3, regression=False):
     model.add(Flatten())
     model.add(Dense(1))
     
-    if not regression:
+    if regression:
+        model.add(Activation('linear'))
+    else:
         model.add(Activation('sigmoid'))
         
-    #model.summary()
+    model.summary()
     return model
 
 def create_convolution_block(input_layer, n_filters, batch_normalization=False, kernel=(3, 3, 3), activation=None,

@@ -14,7 +14,7 @@ os.system('export HDF5_USE_FILE_LOCKING=FALSE')
 
 TRAIN = True
 
-initial_lr = .0001
+initial_lr = .01
 num_to_load = None
 epochs = 60
 
@@ -25,7 +25,7 @@ load_saved_weights = False
 model_loc = main_dr + 'saved_models/ADHD1.h5'
 temp_loc = '/home/sage/temp/'
 
-preloaded = False
+preloaded = True
 bs = 2
 
 def create_gens(train, test):
@@ -83,8 +83,12 @@ dl = ABCD_DataLoader(
 train, test, val = dl.get_train_test_val_split(.2, .1, 43)
 print(len(train), len(test), len(val))
 
-model = CNN_3D(input_shape=input_dims, sf=4, d_rate=.2, regression=True)
-model.compile(loss = 'mean_squared_error', optimizer = keras.optimizers.adam(initial_lr), metrics=['mse'])
+
+rn_builder = Resnet3DBuilder()
+#model = rn_builder.build_resnet_50(input_shape=input_dims, num_outputs=1, reg_factor=1e-4, regression=True)
+
+model = CNN_3D(input_shape=input_dims, sf=6, d_rate=0, regression=True)
+model.compile(loss = 'mean_squared_error', optimizer = keras.optimizers.adam(initial_lr))
 
 if TRAIN:
 
@@ -111,7 +115,9 @@ if TRAIN:
                         callbacks=callbacks)
 
 else:
-  
+
+    model.load_weights(model_loc)
+
     test_gen = create_gens(test, None)
     preds = model.predict_generator(test_gen, workers=8, verbose=1)
 
