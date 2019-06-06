@@ -84,7 +84,7 @@ dl = ABCD_DataLoader(
 
 #rn_builder = Resnet3DBuilder()
 #model = rn_builder.build_resnet_50(input_shape=input_dims, num_outputs=1, reg_factor=1e-4, regression=False)
-model = CNN_3D(input_dims, 4, .2, False)
+model = CNN_3D(input_dims, sf=4, n_layers=6, d_rate=0, batch_norm=True, regression=False, coord_conv=True)
 model.summary()
 
 #test = dl.get_all()

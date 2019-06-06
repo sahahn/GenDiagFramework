@@ -4,58 +4,47 @@ from keras.layers import Conv3D, MaxPooling3D, BatchNormalization, Activation, F
 from keras.layers import SpatialDropout3D, Add
 from keras.engine import Input
 from keras.layers.convolutional import AveragePooling3D
+from coord import CoordinateChannel3D
 
+def add_layer(x, num_filters, d_rate, batch_norm):
+    
+    x = Conv3D(num_filters, kernel_size=(3, 3, 3), padding='same', activation='relu')(x)
+    
+    if d_rate > 0:
+        x = SpatialDropout3D(d_rate)(x)
 
-def CNN_3D(input_shape, sf=4, d_rate=.3, regression=False):
-    filters = [sf, sf * 2, sf * 4, sf*8, sf*16]
-    model = Sequential()
+    x = Conv3D(num_filters, kernel_size=(3, 3, 3), padding='same')(x)
+    
+    if batch_norm:
+        x = BatchNormalization(axis=-1)(x)
+    
+    x = Activation('relu')(x)
+    return MaxPooling3D(pool_size=(2, 2, 2), strides=2, padding='valid')(x)
 
-    model.add(Conv3D(filters=filters[0], kernel_size=(3, 3, 3), padding='same', input_shape=input_shape))
-    model.add(Activation('relu'))
-    model.add(SpatialDropout3D(d_rate))
-    model.add(Conv3D(filters=filters[0], kernel_size=(3, 3, 3), padding='same'))
-    model.add(BatchNormalization(axis=-1))
-    model.add(Activation('relu'))
-    model.add(MaxPooling3D(pool_size=(2, 2, 2), strides=2, padding='valid'))
+def CNN_3D(input_shape, sf=4, n_layers=6, d_rate=.3, batch_norm=True, regression=False, coord_conv=False):
     
-    model.add(Conv3D(filters=filters[1], kernel_size=(3, 3, 3), padding='same'))
-    model.add(Activation('relu'))
-    model.add(SpatialDropout3D(d_rate))
-    model.add(Conv3D(filters=filters[1], kernel_size=(3, 3, 3), padding='same'))
-    model.add(BatchNormalization(axis=-1))
-    model.add(Activation('relu'))
-    model.add(MaxPooling3D(pool_size=(2, 2, 2), strides=2, padding='valid'))
-              
-    model.add(Conv3D(filters=filters[2], kernel_size=(3, 3, 3), padding='same'))
-    model.add(Activation('relu'))
-    model.add(Conv3D(filters=filters[2], kernel_size=(3, 3, 3), padding='same'))
-    model.add(BatchNormalization(axis=-1))
-    model.add(Activation('relu'))
-    model.add(MaxPooling3D(pool_size=(2, 2, 2), strides=2, padding='valid'))
+    filters = [sf * (2 ** n) for n in range(n_layers)]
     
-    model.add(Conv3D(filters=filters[3], kernel_size=(3, 3, 3), padding='same'))
-    model.add(Activation('relu'))
-    model.add(Conv3D(filters=filters[3], kernel_size=(3, 3, 3), padding='same'))
-    model.add(BatchNormalization(axis=-1))
-    model.add(Activation('relu'))
-    model.add(MaxPooling3D(pool_size=(2, 2, 2), strides=2, padding='valid'))
+    ip = Input(shape = input_shape)
     
-    model.add(Conv3D(filters=filters[4], kernel_size=(3, 3, 3), padding='same'))
-    model.add(Activation('relu'))
-    model.add(Conv3D(filters=filters[4], kernel_size=(3, 3, 3), padding='same'))
-    model.add(BatchNormalization(axis=-1))
-    model.add(Activation('relu'))
-    model.add(MaxPooling3D(pool_size=(2, 2, 2), strides=2, padding='valid'))
-              
-    model.add(Flatten())
-    model.add(Dense(1))
+    if coord_conv:
+        x = CoordinateChannel3D()(ip)
+        x = add_layer(x, filters[0], d_rate, batch_norm)
+    else:
+        x = add_layer(ip, filters[0], d_rate, batch_norm)
+        
+    for l in range(1, len(filters)):
+        x = add_layer(x, filters[l], d_rate, batch_norm)
+    
+    x = Flatten()(x)
+    x = Dense(1)(x)
     
     if regression:
-        model.add(Activation('linear'))
+        x = Activation('linear')(x)
     else:
-        model.add(Activation('sigmoid'))
+        x = Activation('sigmoid')(x)
         
-    model.summary()
+    model = Model(ip, x)
     return model
 
 def create_convolution_block(input_layer, n_filters, batch_normalization=False, kernel=(3, 3, 3), activation=None,
