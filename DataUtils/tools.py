@@ -39,10 +39,12 @@ def reverse_standardize_data(data, scale_info):
     
     return data
 
-def normalize_data(data):
-    
-    imax = np.max(data)
-    imin = np.min(data)
+def normalize_data(data, min_max=None):
+
+    if min_max == None:
+        imin, imax = np.min(data), np.max(data)
+    else:
+        imin, imax = min_max
 
     data -= imin
     data /= (imax-imin)

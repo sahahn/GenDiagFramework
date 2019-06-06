@@ -21,6 +21,7 @@ class ABCD_DataLoader(DataLoader):
                  input_size=(256,256,256,1),
                  load_segs=False,
                  segs_key='aparc.a2009s+aseg.mgz',
+                 min_max=None,
                  limit=None,
                  in_memory=True,
                  memory_loc=None,
@@ -36,7 +37,8 @@ class ABCD_DataLoader(DataLoader):
          self.input_size = input_size
          self.load_segs = load_segs
          self.segs_key = segs_key
-         
+         self.min_max = min_max
+
          if limit == None:
              self.limit = 10000000
          else:
@@ -72,7 +74,7 @@ class ABCD_DataLoader(DataLoader):
                     
                     dp.set_affine(raw_file.affine)
                     data = raw_file.get_fdata()
-                    data = normalize_data(data)
+                    data = normalize_data(data, self.min_max)
 
                     xs, ys = get_crop_ind(data)
                     data = data[xs[0]:ys[0], xs[1]:ys[1], xs[2]:ys[2]]
@@ -113,6 +115,8 @@ class ABCD_DataLoader(DataLoader):
         
         if len(shapes) > 0:
             print(np.max(shapes, axis=0))
+
+        print(len(self.data_points), 'loaded')
 
     #All Unique patients, so just override get_patient, w/ get name instead
     def get_unique_patients(self):

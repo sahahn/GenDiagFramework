@@ -20,13 +20,13 @@ epochs = 60
 
 input_dims = (192, 192, 192, 1)
 main_dr = '/home/sage/GenDiagFramework/'
-load_saved_weights = True
+load_saved_weights = False
 
 model_loc = main_dr + 'saved_models/Alc.h5'
 temp_loc = '/home/sage/alc-temp/'
 
 preloaded = False
-bs = 2
+bs = 1
 
 def create_gens(train, test):
 
@@ -67,12 +67,13 @@ def create_gens(train, test):
 
 dl = ABCD_DataLoader(
                  init_location = '/home/sage/enigma',
-                 label_location = main_dr + 'labels/Gender_Train.csv',
+                 label_location = main_dr + 'labels/Alc_Subjects.csv',
                  label_key='',
                  file_key='brain.finalsurfs.mgz',
                  input_size=input_dims,
                  load_segs=False,
                  segs_key='aparc.a2009s+aseg.mgz',
+                 min_max=(0,255),
                  limit=num_to_load,
                  in_memory=False,
                  memory_loc=temp_loc,
@@ -84,6 +85,7 @@ dl = ABCD_DataLoader(
 #rn_builder = Resnet3DBuilder()
 #model = rn_builder.build_resnet_50(input_shape=input_dims, num_outputs=1, reg_factor=1e-4, regression=False)
 model = CNN_3D(input_dims, 4, .2, False)
+model.summary()
 
 #test = dl.get_all()
 train, test, val = dl.get_train_test_val_split(.2, .1, 43)
@@ -97,7 +99,6 @@ if TRAIN:
         model.load_weights(model_loc)
         print('loaded weights')
 
-    model.summary()
     gen, test_gen = create_gens(train, val)
 
     callbacks = get_callbacks(model_file = model_loc,
