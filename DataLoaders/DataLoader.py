@@ -63,14 +63,27 @@ class DataLoader():
         
     
     def create_data_point(self, name, label, slc=None):
-        
-        dp = DataPoint(
+
+        if type(label) == list:
+
+            dp = DataPoint(
                 name = name,
-                label = label,
+                label = label[0],
+                extra = label[1:],
                 in_memory = self.in_memory,
                 memory_loc = self.memory_loc,
                 compress = self.compress,
                 slc = slc )
+
+        else:
+
+            dp = DataPoint(
+                    name = name,
+                    label = label,
+                    in_memory = self.in_memory,
+                    memory_loc = self.memory_loc,
+                    compress = self.compress,
+                    slc = slc )
         
         return dp
         

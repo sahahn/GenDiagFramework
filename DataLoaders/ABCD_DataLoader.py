@@ -17,6 +17,7 @@ class ABCD_DataLoader(DataLoader):
                  init_location,    
                  label_location,
                  label_key='NDAR',
+                 load_extra_info=False,
                  file_key='brain.finalsurfs.mgz',
                  input_size=(256,256,256,1),
                  load_segs=False,
@@ -29,20 +30,21 @@ class ABCD_DataLoader(DataLoader):
                  preloaded=False
                  ):
         
-         super().__init__(init_location, label_location, in_memory, memory_loc,
+        super().__init__(init_location, label_location, in_memory, memory_loc,
                          compress, preloaded)
          
-         self.label_key = label_key
-         self.file_key = file_key
-         self.input_size = input_size
-         self.load_segs = load_segs
-         self.segs_key = segs_key
-         self.min_max = min_max
+        self.label_key = label_key
+        self.load_extra_info = load_extra_info
+        self.file_key = file_key
+        self.input_size = input_size
+        self.load_segs = load_segs
+        self.segs_key = segs_key
+        self.min_max = min_max
 
-         if limit == None:
-             self.limit = 10000000
-         else:
-             self.limit = limit
+        if limit == None:
+            self.limit = 10000000
+        else:
+            self.limit = limit
          
     def load_labels(self):
         
@@ -54,7 +56,11 @@ class ABCD_DataLoader(DataLoader):
             for line in lines:
                 if self.label_key in line:
                     line = line.split(',')
-                    self.label_dict[line[0]] = float(line[1].strip())
+
+                    if self.load_extra_info:
+                        self.label_dict[line[0]] = [float(l.stip()) for l in line[1:]]
+                    else:
+                        self.label_dict[line[0]] = float(line[1].strip())
             
     def load_data(self):
 
@@ -96,7 +102,7 @@ class ABCD_DataLoader(DataLoader):
                             seg = np.expand_dims(seg, axis=-1)
                             seg = fill_to(seg, self.input_size)
                         except:
-                            print('error with segmentation ', )
+                            print('error loading segmentation ', )
 
                     if np.shape(data) != self.input_size:
                         
@@ -133,4 +139,40 @@ class ABCD_DataLoader(DataLoader):
                 relevant.append(dp)
 
         return relevant
+
+
+    def get_splits_by_site(self, test_sites=[], val_sites=[]):
+        '''Provide input for splits as list/set of sites to include in test set only or validation set only'''
+
+        if test_sites == None:
+            test_sites = []
+        if val_sites == None:
+            val_sites = []
+
+        self.load_all()
+        train, test, val = [], [], []
+
+        for dp in self.data_points:
+            site = int(dp.get_extra()[0])
+
+            if site not in test_sites and site not in val_sites:
+                train.append(dp)
+            elif site in test_sites:
+                test.append(dp)
+            elif site in val_sites:
+                val.append(dp)
+
+        if len(val) == 0 and len(test) == 0:
+            return train
+        elif len(val) == 0:
+            return train, test
+        elif len(test) == 0:
+            return train, val
+        else:
+            return train, test, val
+
+
+
+        
+        
 

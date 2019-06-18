@@ -13,7 +13,8 @@ class DataPoint():
     def __init__(self,
                  name,
                  label,
-                 in_memory,
+                 extra=None,
+                 in_memory=False,
                  memory_loc=None,
                  slc=None,
                  compress=False
@@ -26,6 +27,7 @@ class DataPoint():
         self.compress = compress
         
         self.set_label(label)
+        self.set_extra(extra)
         
         self.data = None
         self.affine = None
@@ -53,6 +55,13 @@ class DataPoint():
             self.label = label
         else:
             np.save(self.memory_loc + self.get_ref() + 'label', label)
+
+    def set_extra(self, extra):
+
+        if self.in_memory:
+            self.extra = extra
+        else:
+            np.save(self.memory_loc + self.get_ref() + 'extra', extra)
             
     def set_affine(self, affine):
         
@@ -106,6 +115,13 @@ class DataPoint():
             
         else:
             return np.load(self.memory_loc + self.get_ref() + 'label.npy')
+
+    def get_extra(self):
+        
+        if self.in_memory:
+            return self.extra
+        else:
+            return np.load(self.memory_loc + self.get_ref() + 'extra.npy')
 
     def get_thickness(self):
         return self.get_pixdims()[2]

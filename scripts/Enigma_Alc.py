@@ -1,5 +1,6 @@
 import keras
 import numpy as np
+import tensorflow as tf
 import os, sys
 
 from DataLoaders.ABCD_DataLoader import ABCD_DataLoader
@@ -9,111 +10,101 @@ from Models.CNNs_3D import CNN_3D
 from Callbacks.LR_decay import get_callbacks
 from sklearn.metrics import f1_score, roc_auc_score, precision_score, recall_score, accuracy_score
 
+def auc_roc(y_true, y_pred):
+    # any tensorflow metric
+    value, update_op = tf.contrib.metrics.streaming_auc(y_pred, y_true)
+
+    # find all variables created for this metric
+    metric_vars = [i for i in tf.local_variables() if 'auc_roc' in i.name.split('/')[1]]
+
+    # Add metric variables to GLOBAL_VARIABLES collection.
+    # They will be initialized for new session.
+    for v in metric_vars:
+        tf.add_to_collection(tf.GraphKeys.GLOBAL_VARIABLES, v)
+
+    # force to update metric values
+    with tf.control_dependencies([update_op]):
+        value = tf.identity(value)
+        return value
+
 np.warnings.filterwarnings('ignore')
 os.system('export HDF5_USE_FILE_LOCKING=FALSE')
 
-TRAIN = True
-
-initial_lr = .0001
-num_to_load = None
-epochs = 40
-
 input_dims = (192, 192, 192, 1)
-main_dr = '/home/sage/GenDiagFramework/'
+main_dr    = '/home/sage/GenDiagFramework/'
+model_loc  = main_dr + 'saved_models/Alc.h5'
+
+TRAIN              = True
 load_saved_weights = False
+bs                 = 4
 
-model_loc = main_dr + 'saved_models/Alc.h5'
-temp_loc = '/home/sage/alc-temp/'
-
-preloaded = True
-bs = 4
-
-def create_gens(train, test):
-
-    gen, test_gen = None, None
-
-    if train != None:   
-        gen = IQ_Generator(
-                data_points = train,
-                dim=input_dims,
-                batch_size = bs,
-                n_classes = 1,
-                shuffle = False,
-                augment = False,
-                distort = True,
-                dist_scale = .05,
-                gauss_noise = .001,
-                rand_seg_remove = 0
-                )
-
-    if test != None:
-        test_gen = IQ_Generator(
-                data_points = test,
-                dim=input_dims,
-                batch_size = 1,
-                n_classes = 1,
-                shuffle = False,
-                augment = False
-                )
-
-    if gen != None and test_gen != None:
-        return gen, test_gen
+def create_train_gen(train):
     
-    elif gen != None:
-        return gen
-    
-    elif test_gen != None:
-        return test_gen
+    gen = IQ_Generator(
+                    data_points     = train,
+                    dim             = input_dims,
+                    batch_size      = bs,
+                    n_classes       = 1,
+                    shuffle         = False,
+                    augment         = False,
+                    distort         = True,
+                    dist_scale      = .05,
+                    gauss_noise     = .001,
+                    rand_seg_remove = 0
+                    )
 
-train_dl = ABCD_DataLoader(
-                 init_location = '/home/sage/enigma',
-                 #label_location = main_dr + 'labels/Alc_Subjects.csv',
-                 label_location = main_dr + 'labels/not_site3.csv',
-                 label_key='',
-                 file_key='brain.finalsurfs.mgz',
-                 input_size=input_dims,
-                 load_segs=False,
-                 segs_key='aparc.a2009s+aseg.mgz',
-                 min_max=(0,255),
-                 limit=num_to_load,
-                 in_memory=False,
-                 memory_loc=temp_loc,
-                 compress=False,
-                 preloaded=preloaded
-                 )
+    return gen
 
+def create_test_gen(test):
 
-val_dl = ABCD_DataLoader(
-                 init_location = '/home/sage/enigma',
-                 #label_location = main_dr + 'labels/Alc_Subjects.csv',
-                 label_location = main_dr + 'labels/site3.csv',
-                 label_key='',
-                 file_key='brain.finalsurfs.mgz',
-                 input_size=input_dims,
-                 load_segs=False,
-                 segs_key='aparc.a2009s+aseg.mgz',
-                 min_max=(0,255),
-                 limit=num_to_load,
-                 in_memory=False,
-                 memory_loc=temp_loc,
-                 compress=False,
-                 preloaded=preloaded
-                 )
+    test_gen = IQ_Generator(
+                    data_points     = test,
+                    dim             = input_dims,
+                    batch_size      = 1,
+                    n_classes       = 1,
+                    shuffle         = False,
+                    augment         = False
+                    )
 
+    return test_gen
 
-#rn_builder = Resnet3DBuilder()
-#model = rn_builder.build_resnet_50(input_shape=input_dims, num_outputs=1, reg_factor=1e-4, regression=False)
-model = CNN_3D(input_dims, sf=4, n_layers=6, d_rate=0, batch_norm=True, regression=False, coord_conv=False)
+dl = ABCD_DataLoader(
+                    init_location   = '/home/sage/enigma',
+                    label_location  = main_dr + 'labels/Alc_Subjects.csv',
+                    label_key       = '',
+                    load_extra_info = True,
+                    file_key        = 'brain.finalsurfs.mgz',
+                    input_size      = input_dims,
+                    load_segs       = False,
+                    segs_key        = 'aparc.a2009s+aseg.mgz',
+                    min_max         = (0,255),
+                    limit           = None,
+                    in_memory       = False,
+                    memory_loc      = '/home/sage/alc-temp/',
+                    compress        = False,
+                    preloaded       = True
+                    )
+
+model = CNN_3D(input_dims,
+                    sf              = 4,
+                    n_layers        = 6,
+                    d_rate          = 0, 
+                    batch_norm      = True, 
+                    regression      = False, 
+                    coord_conv      = False
+                    )
+
+model.compile(
+                    loss ='binary_crossentropy',
+                    optimizer=keras.optimizers.adam(.0001),
+                    metrics=['accuracy', auc_roc]
+                    )
+
 model.summary()
-
-train = train_dl.get_all()
-val = val_dl.get_all()
-print(len(train), len(val))
-
-#train, test, val = dl.get_train_test_val_split(.2, .1, 43)
-#print(len(train), len(test), len(val))
-
-model.compile(loss ='binary_crossentropy', optimizer=keras.optimizers.adam(initial_lr), metrics=['accuracy'])
+train, test, val = dl.get_splits_by_site(test_sites=[5], val_sites=[3])
+print('Train size: ', len(train))
+print('Test  size: ', len(test))
+print('Val   size: ', len(val))
 
 if TRAIN:
 
@@ -121,36 +112,41 @@ if TRAIN:
         model.load_weights(model_loc)
         print('loaded weights')
 
-    gen, test_gen = create_gens(train, val)
+    gen, test_gen = create_train_gen(train), create_test_gen(val)
 
-    callbacks = get_callbacks(model_file = model_loc,
-                            initial_learning_rate=initial_lr,
-                            learning_rate_drop=.5,
-                            learning_rate_epochs=None,
-                            learning_rate_patience=50,
-                            verbosity=1,
-                            early_stopping_patience=130)
+    callbacks = get_callbacks(
+                    model_file              = model_loc,
+                    initial_learning_rate   = initial_lr,
+                    learning_rate_drop      = .5,
+                    learning_rate_epochs    = None,
+                    learning_rate_patience  = 50,
+                    verbosity               = 1,
+                    early_stopping_patience = 130
+                    )
 
-    model.fit_generator(generator=gen,
-                        validation_data=test_gen,
-                        use_multiprocessing=True,
-                        workers=8,
-                        epochs=epochs,
-                        callbacks=callbacks)
+    model.fit_generator(
+                    generator               = gen,
+                    validation_data         = test_gen,
+                    use_multiprocessing     = True,
+                    workers                 = 8,
+                    epochs                  = 50,
+                    callbacks               = callbacks
+                    )
 
 else:
   
     model.load_weights(model_loc)
-    test_gen = create_gens(None, test)
+    test_gen = create_test_gen(test)
 
     preds = model.predict_generator(test_gen, workers=8, verbose=1)
+    
     for p in range(len(preds)):
         test[p].set_pred_label(float(preds[p]))
 
     true = np.array([dp.get_label() for dp in test])
     pred = np.array([dp.get_pred_label() for dp in test])
-
     print('roc auc: ', roc_auc_score(true, pred))
+    
     pred = np.array(pred).round()
     print('f1 score: ', f1_score(true, pred))
     print('precision score: ', precision_score(true, pred))
