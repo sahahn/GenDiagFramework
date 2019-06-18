@@ -4,13 +4,15 @@ import numpy as np
 
 class ROC_callback(Callback):
     
-    def __init__(self, train_gen, val_gen, train_dps, val_dps):
+    def __init__(self, train_gen, val_gen, train_dps, val_dps, workers=1):
         
         self.train_gen = train_gen
         self.val_gen   = val_gen
 
         self.train_labels = np.array([dp.get_label() for dp in train_dps])
         self.val_labels = np.array([dp.get_label() for dp in val_dps])
+
+        self.workers = workers
 
     def on_train_begin(self, logs={}):
         return
@@ -34,16 +36,14 @@ class ROC_callback(Callback):
     def on_epoch_end(self, epoch, logs={}):
 
         print('-- Train Metrics --')
-        train_preds = self.model.predict_generator(self.train_gen)
+        train_preds = self.model.predict_generator(self.train_gen, workers=self.workers)
         self.print_stats(self.train_labels, train_preds)
 
         print('-- Val Metrics --')
-        val_preds = self.model.predict_generator(self.val_gen)
+        val_preds = self.model.predict_generator(self.val_gen, workers=self.workers)
         self.print_stats(self.val_labels, val_preds)
         
         return
-
-        y_preds = model.predict_generator(test_gen, workers=8, verbose=1)
 
     def on_batch_begin(self, batch, logs={}):
         return

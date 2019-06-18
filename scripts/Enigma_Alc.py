@@ -108,7 +108,7 @@ if TRAIN:
                     early_stopping_patience = 130
                     )
 
-    callbacks.append(ROC_callback(train_gen, val_gen, train, val))
+    callbacks.append(ROC_callback(train_gen, val_gen, train, val, workers=8))
 
     model.fit_generator(
                     generator               = train_gen,
