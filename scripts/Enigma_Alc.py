@@ -3,6 +3,8 @@ import numpy as np
 import tensorflow as tf
 import os, sys
 
+import keras.backend as K
+
 from DataLoaders.ABCD_DataLoader import ABCD_DataLoader
 from Generators.IQ_Generator import IQ_Generator
 from Models.Resnet3D import Resnet3DBuilder
@@ -12,7 +14,7 @@ from sklearn.metrics import f1_score, roc_auc_score, precision_score, recall_sco
 
 def auc_roc(y_true, y_pred):
     # any tensorflow metric
-    value, update_op = tf.contrib.metrics.streaming_auc(y_pred, y_true)
+    value, update_op = tf.metrics.auc(y_true, y_pred)
 
     # find all variables created for this metric
     metric_vars = [i for i in tf.local_variables() if 'auc_roc' in i.name.split('/')[1]]
@@ -27,6 +29,11 @@ def auc_roc(y_true, y_pred):
         value = tf.identity(value)
         return value
 
+def auc_1(y_true, y_pred):
+    auc = tf.metrics.auc(y_true, y_pred)[1]
+    K.get_session().run(tf.local_variables_initializer())
+    return auc
+
 np.warnings.filterwarnings('ignore')
 os.system('export HDF5_USE_FILE_LOCKING=FALSE')
 
@@ -37,6 +44,7 @@ model_loc  = main_dr + 'saved_models/Alc.h5'
 TRAIN              = True
 load_saved_weights = False
 bs                 = 4
+initial_lr         = .0001
 
 def create_train_gen(train):
     
@@ -96,8 +104,8 @@ model = CNN_3D(input_dims,
 
 model.compile(
                     loss ='binary_crossentropy',
-                    optimizer=keras.optimizers.adam(.0001),
-                    metrics=['accuracy', auc_roc]
+                    optimizer=keras.optimizers.adam(initial_lr),
+                    metrics=['accuracy', auc_roc, auc_1]
                     )
 
 model.summary()

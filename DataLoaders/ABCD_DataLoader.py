@@ -58,7 +58,7 @@ class ABCD_DataLoader(DataLoader):
                     line = line.split(',')
 
                     if self.load_extra_info:
-                        self.label_dict[line[0]] = [float(l.stip()) for l in line[1:]]
+                        self.label_dict[line[0]] = [float(l.strip()) for l in line[1:]]
                     else:
                         self.label_dict[line[0]] = float(line[1].strip())
             
