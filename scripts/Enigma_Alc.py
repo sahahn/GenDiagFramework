@@ -1,38 +1,14 @@
 import keras
 import numpy as np
-import tensorflow as tf
 import os, sys
-
-import keras.backend as K
 
 from DataLoaders.ABCD_DataLoader import ABCD_DataLoader
 from Generators.IQ_Generator import IQ_Generator
 from Models.Resnet3D import Resnet3DBuilder
 from Models.CNNs_3D import CNN_3D
 from Callbacks.LR_decay import get_callbacks
+from Callbacks.ROC_callback import ROC_callback
 from sklearn.metrics import f1_score, roc_auc_score, precision_score, recall_score, accuracy_score
-
-def auc_roc(y_true, y_pred):
-    # any tensorflow metric
-    value, update_op = tf.metrics.auc(y_true, y_pred)
-
-    # find all variables created for this metric
-    metric_vars = [i for i in tf.local_variables() if 'auc_roc' in i.name.split('/')[1]]
-
-    # Add metric variables to GLOBAL_VARIABLES collection.
-    # They will be initialized for new session.
-    for v in metric_vars:
-        tf.add_to_collection(tf.GraphKeys.GLOBAL_VARIABLES, v)
-
-    # force to update metric values
-    with tf.control_dependencies([update_op]):
-        value = tf.identity(value)
-        return value
-
-def auc_1(y_true, y_pred):
-    auc = tf.metrics.auc(y_true, y_pred)[1]
-    K.get_session().run(tf.local_variables_initializer())
-    return auc
 
 np.warnings.filterwarnings('ignore')
 os.system('export HDF5_USE_FILE_LOCKING=FALSE')
@@ -120,7 +96,7 @@ if TRAIN:
         model.load_weights(model_loc)
         print('loaded weights')
 
-    gen, test_gen = create_train_gen(train), create_test_gen(val)
+    train_gen, test_gen = create_train_gen(train), create_test_gen(val)
 
     callbacks = get_callbacks(
                     model_file              = model_loc,
@@ -132,8 +108,10 @@ if TRAIN:
                     early_stopping_patience = 130
                     )
 
+    callbacks.append(ROC_callback(train_gen, val_gen, train, val))
+
     model.fit_generator(
-                    generator               = gen,
+                    generator               = train_gen,
                     validation_data         = test_gen,
                     use_multiprocessing     = True,
                     workers                 = 8,
@@ -146,13 +124,8 @@ else:
     model.load_weights(model_loc)
     test_gen = create_test_gen(test)
 
-    preds = model.predict_generator(test_gen, workers=8, verbose=1)
-    
-    for p in range(len(preds)):
-        test[p].set_pred_label(float(preds[p]))
-
+    pred = model.predict_generator(test_gen, workers=8, verbose=1)
     true = np.array([dp.get_label() for dp in test])
-    pred = np.array([dp.get_pred_label() for dp in test])
     print('roc auc: ', roc_auc_score(true, pred))
     
     pred = np.array(pred).round()
