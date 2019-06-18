@@ -4,7 +4,7 @@ from keras.layers import Conv3D, MaxPooling3D, BatchNormalization, Activation, F
 from keras.layers import SpatialDropout3D, Add
 from keras.engine import Input
 from keras.layers.convolutional import AveragePooling3D
-from coord import CoordinateChannel3D
+from Models.coord import CoordinateChannel3D
 
 def add_layer(x, num_filters, d_rate, batch_norm):
     

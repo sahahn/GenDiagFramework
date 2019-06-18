@@ -16,7 +16,7 @@ TRAIN = True
 
 initial_lr = .0001
 num_to_load = None
-epochs = 60
+epochs = 40
 
 input_dims = (192, 192, 192, 1)
 main_dr = '/home/sage/GenDiagFramework/'
@@ -25,8 +25,8 @@ load_saved_weights = False
 model_loc = main_dr + 'saved_models/Alc.h5'
 temp_loc = '/home/sage/alc-temp/'
 
-preloaded = False
-bs = 1
+preloaded = True
+bs = 4
 
 def create_gens(train, test):
 
@@ -65,9 +65,10 @@ def create_gens(train, test):
     elif test_gen != None:
         return test_gen
 
-dl = ABCD_DataLoader(
+train_dl = ABCD_DataLoader(
                  init_location = '/home/sage/enigma',
-                 label_location = main_dr + 'labels/Alc_Subjects.csv',
+                 #label_location = main_dr + 'labels/Alc_Subjects.csv',
+                 label_location = main_dr + 'labels/not_site3.csv',
                  label_key='',
                  file_key='brain.finalsurfs.mgz',
                  input_size=input_dims,
@@ -77,19 +78,40 @@ dl = ABCD_DataLoader(
                  limit=num_to_load,
                  in_memory=False,
                  memory_loc=temp_loc,
-                 compress=True,
+                 compress=False,
+                 preloaded=preloaded
+                 )
+
+
+val_dl = ABCD_DataLoader(
+                 init_location = '/home/sage/enigma',
+                 #label_location = main_dr + 'labels/Alc_Subjects.csv',
+                 label_location = main_dr + 'labels/site3.csv',
+                 label_key='',
+                 file_key='brain.finalsurfs.mgz',
+                 input_size=input_dims,
+                 load_segs=False,
+                 segs_key='aparc.a2009s+aseg.mgz',
+                 min_max=(0,255),
+                 limit=num_to_load,
+                 in_memory=False,
+                 memory_loc=temp_loc,
+                 compress=False,
                  preloaded=preloaded
                  )
 
 
 #rn_builder = Resnet3DBuilder()
 #model = rn_builder.build_resnet_50(input_shape=input_dims, num_outputs=1, reg_factor=1e-4, regression=False)
-model = CNN_3D(input_dims, sf=4, n_layers=6, d_rate=0, batch_norm=True, regression=False, coord_conv=True)
+model = CNN_3D(input_dims, sf=4, n_layers=6, d_rate=0, batch_norm=True, regression=False, coord_conv=False)
 model.summary()
 
-#test = dl.get_all()
-train, test, val = dl.get_train_test_val_split(.2, .1, 43)
-print(len(train), len(test), len(val))
+train = train_dl.get_all()
+val = val_dl.get_all()
+print(len(train), len(val))
+
+#train, test, val = dl.get_train_test_val_split(.2, .1, 43)
+#print(len(train), len(test), len(val))
 
 model.compile(loss ='binary_crossentropy', optimizer=keras.optimizers.adam(initial_lr), metrics=['accuracy'])
 
